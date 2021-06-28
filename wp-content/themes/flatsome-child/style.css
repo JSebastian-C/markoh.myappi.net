@@ -1,0 +1,96 @@
+/*
+Theme Name: Flatsome Child
+Description: This is a child theme for Flatsome Theme
+Author: UX Themes
+Template: flatsome
+Version: 3.0
+*/
+
+/*************** ADD CUSTOM CSS HERE.   ***************/
+.intro_container{
+	height:100vh;
+}
+.sidebar-menu.no-scrollbar {
+    padding-top: 0;
+}
+.off-canvas .nav-vertical>li>a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.sidebar-menu li.menu-item:before {
+    font-family: 'FontAwesome';
+    margin-left: 20px;
+}
+.sidebar-menu li.menu-item:nth-child(2):before {
+    content: '\f015'; /* home */
+}
+.sidebar-menu li.menu-item:nth-child(3):before {
+    content: '\f007'; /* perfil */
+}
+.sidebar-menu li.menu-item:nth-child(4):before {
+    content: '\f0c0'; /* equipos */
+}
+.sidebar-menu li.menu-item-55:before {
+    content: '\f1ea'; /* news */
+}
+.sidebar-menu li.menu-item-158:before {
+    content: '\f1e3'; /* canchas */
+}
+.sidebar-menu li.menu-item-182:before {
+    content: '\f0f3'; /* notificaciones */
+}
+.sidebar-menu li.menu-item-192:before {
+    content: '\f2f5'; /* salir */
+}
+#logo{
+	display:none;
+}
+.nav>li>a>i.icon-menu{
+	color:white;
+}
+.login_form button{
+    width: 100%;
+    background: #05353f;
+    border-radius: 5px;
+    color: white;
+    margin: 0;
+}
+.login_form a{
+	display:block;
+	margin:10px;
+}
+.login_form .section-title{
+	justify-content:center !important;
+}
+.login_form h3 b{
+	display:none;
+}
+.login_form input {
+    border: 0 !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid #aaa !important;
+    padding: 15px 0 !important;
+    height: auto !important;
+    font-weight: 100;
+    font-size: 17px !important;
+    margin: 0;
+}
+.login_form.register select {
+	margin-bottom:10px !important;
+	
+}
+.login_form.register input, .login_form.register select {
+    border: 0 !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid #aaa !important;
+    padding: 10px 0 !important;
+    height: auto !important;
+    font-weight: 100;
+    font-size: 17px !important;
+    margin: 0;
+}
+@media only screen and (max-width: 48em) {
+/*************** ADD MOBILE ONLY CSS HERE  ***************/
+
+
+}
