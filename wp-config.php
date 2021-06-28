@@ -23,10 +23,10 @@
 define( 'DB_NAME', 'myappi_markoh' );
 
 /** MySQL database username */
-define( 'DB_USER', 'myappi_markoh' );
+define( 'DB_USER', 'root' );
 
 /** MySQL database password */
-define( 'DB_PASSWORD', 'yRnvk#kb42dn' );
+define( 'DB_PASSWORD', '' );
 
 /** MySQL hostname */
 define( 'DB_HOST', 'localhost' );
