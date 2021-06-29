@@ -49,12 +49,12 @@
 		</select>
 		<div style="display:flex;margin: 20px 0;">
 			<b>Participantes</b>
-			<a href="#" class="invitar" >Invitar</a>
+			<a href="#" class="invitar">Invitar</a>
 		</div>
 		<table class="table_seleccionados">
 			<tr  data-id="<?=$user->ID?>">
-				<td width="40px"><img src="<?=empty($meta->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $meta->profile_picture?>" width="40px"/></td>
-				<td width=""><?=$meta->nombre. ' ' .$meta->apellido?></td>
+				<td width="40px"><img src="<?=empty($user->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $user->profile_picture?>" width="40px"/></td>
+				<td width=""><?=$user->nombre. ' ' .$user->apellido?></td>
 				<td width="30px"><a href="#" class="delete_user" style="color:#cb0505;font-size:25px;"><i class="fa fa-times-circle"></i></a></td>
 			</tr>
 		</table>

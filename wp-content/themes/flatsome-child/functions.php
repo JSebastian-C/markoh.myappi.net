@@ -711,9 +711,9 @@ function markoh_custom_shortcodes($atts = array()) {
 	$m = get_user_meta($user->ID);
 	$meta = new stdClass();
 	foreach($m as $k => $v){
-		$meta->$k = $v[0];
+		$meta->$k = $v;
 	}
-	
+
 	extract(shortcode_atts(array(
      'type' => ''
     ), $atts));

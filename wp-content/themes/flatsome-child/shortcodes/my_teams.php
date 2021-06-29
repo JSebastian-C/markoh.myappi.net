@@ -37,7 +37,7 @@
 						<a href="/update_team?id=<?=$v->id?>&invite=1" class="invitar_amigos">Invitar Jugadores</a>
 						<hr style="margin:5px 0;">
 						<a href="/update_team?id=<?=$v->id?>">Modificar Datos</a>
-						<a href="#"  data-nombre="<?=$v->nombre?>"  data-id="<?=$v->id?>" class="eliminar_equipo">Eliminar Equipo</a>
+						<a href="#" data-nombre="<?=$v->nombre?>"  data-id="<?=$v->id?>" class="eliminar_equipo">Eliminar Equipo</a>
 					</div>
 				<?php endif;?>
 				<h3><?=$v->nombre?></h3>
@@ -214,6 +214,9 @@
 					window.location.reload();
 				},'json'
 			}
+			
+			//Refresca la página
+			location.reload();
 		});
 		$('a.opciones').on('click',function(e){
 			e.preventDefault()
