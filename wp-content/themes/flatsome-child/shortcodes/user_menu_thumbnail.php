@@ -1,7 +1,7 @@
 <?php 
 	global $user;
 	global $meta;
-	$url = (isset($meta->profile_picture)) ? $meta->profile_picture : 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png';
+	$url = (isset($user->profile_picture)) ? $user->profile_picture : 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png';
 ?>
 <div style="
     padding: 0 20px;
@@ -15,7 +15,7 @@
     margin: 10px;
     display: inline-block;
     width: auto;
-">Hola, <?=@$meta->nombre?></h1>
+">Hola, <?=@$user->nombre?></h1>
 <div style="
     margin-bottom: 10px;
     font-size: 16px;
