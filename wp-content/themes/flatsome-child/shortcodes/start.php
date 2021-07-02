@@ -1,9 +1,6 @@
 <?php
 global $wpdb;
 global $user;
-global $_SESSION;
-
-$_SESSION = 'hola';
 
 $query = "select count(*) from wp_posts where post_author = {$user->ID} and post_type = 'markoh_notification' and post_status <> 'read'";
 $nro_notificaciones = $wpdb->get_var($query);
@@ -22,52 +19,12 @@ $nro_notificaciones = $wpdb->get_var($query);
 	<h3>Torneos</h3>
 </div>
 -->
-<a href="/new_post_aux" class="click_area invitar_personas">
+<a href="/new_post" class="click_area invitar_personas">
 	<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/markoh-icono-1.png">
 	<h3>Armar Partido</h3>
 </a>
 
-<div id="fondo">
-	<div id="pop-up">
-		<button id="cerrar-pop-up">
-			<span>×</span>
-		</button>
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-		//Aquí insertamos el código de tu formulario, de tu llamada de acción o de lo que necesites poner
-
-
-	</div>
-</div>
-
-<button onclick="" class="btn_search" id="abrir-pop-up"><i class="fa fa-search"></i></button>
+<a href="/search"><button onclick="" class="btn_search"><i class="fa fa-search"></i></button></a>
 
 <?php include 'footer.php' ?>
 <style>
@@ -145,7 +102,7 @@ $nro_notificaciones = $wpdb->get_var($query);
 	}
 
 	.btn_search {
-		background-color: #4e657b;
+		background-color: #004454;
 		border-radius: 200px;
 		color: #FFF;
 		position: fixed;
@@ -156,60 +113,9 @@ $nro_notificaciones = $wpdb->get_var($query);
 		padding-right: 10px;
 	}
 
-	#fondo {
-		display: none;
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background-color: rgba(0, 0, 0, 0.7);
-		z-index: 1111111;
+	.btn_search:hover {
+		background-color: #4e657b;
 	}
-
-	#pop-up {
-		background-color: white;
-		width: 800px;
-		position: absolute;
-		top: 200px;
-		left: 50%;
-		margin-left: -400px;
-		padding: 30px;
-		border-radius: 10px;
-	}
-
-	#cerrar-pop-up {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background-color: transparent;
-	}
-
-	#cerrar-pop-up span {
-		display: flex;
-		width: 50px;
-		height: 50px;
-		background-color: grey;
-		justify-content: center;
-		align-content: center;
-		flex-direction: column;
-		text-align: center;
-		color: white;
-		font-size: 40px;
-		font-weight: bold;
-		border-radius: 1000%;
-	}
-
-/* 	@media (max-width: 800px) {
-		#pop-up {
-			top: 0;
-			left: 0;
-			width: 100%;
-			margin: 0;
-			bottom: 0;
-			overflow-y: scroll;
-		}
-	} */
 </style>
 
 <a href="/notifications" class="notifications_icon">
@@ -225,13 +131,11 @@ $nro_notificaciones = $wpdb->get_var($query);
 			$(".mobile-nav.nav.nav-right li").append($('.notifications_icon'));
 			$('.notifications_icon').show();
 
-			//Evento para abrir el pop up al pulsar un botón. Solo tienes que ponerle al botón que quieras el id abrir-pop-up
-			$('#abrir-pop-up').click(function() {
+			$(".btn_search").click(function() {
 				$('#fondo').fadeIn(300);
 			});
 
-			//Cerrar el pop up al pulsar en la aspa
-			$('#cerrar-pop-up').click(function() {
+			$("#cerrar-modal").click(function() {
 				$('#fondo').fadeOut(300);
 			});
 		});

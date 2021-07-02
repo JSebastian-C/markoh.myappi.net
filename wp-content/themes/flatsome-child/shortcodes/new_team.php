@@ -1,10 +1,11 @@
-<?php 
-	global $user;
-	global $meta;
-	global $wpdb;
-	$url = 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png';
-	
-	$query =   'select 
+<?php
+global $user;
+global $meta;
+global $wpdb;
+//$url = 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png';
+$url = "/wp-content/uploads/2021/05/cancha.png";
+
+$query =   'select 
 					u.ID id, 
 					um4.meta_value profile_picture,
 					um1.meta_value nombre,
@@ -17,13 +18,13 @@
 				LEFT JOIN wp_usermeta um3 ON um3.user_id =  u.ID AND um3.meta_key = "posicion"
 				LEFT JOIN wp_usermeta um4 ON um4.user_id =  u.ID AND um4.meta_key = "profile_picture"
 				INNER JOIN wp_usermeta um5 ON um5.user_id = u.ID AND um5.meta_value like "%jugador%"
-				WHERE u.ID <> '.$user->ID;
-				
-	$usuarios = $wpdb->get_results($query);
-	
+				WHERE u.ID <> ' . $user->ID;
+
+$usuarios = $wpdb->get_results($query);
+
 ?>
 
-<div class="fake_header"> 
+<div class="fake_header">
 	<a href="/my_team" class="icon left"><i class="fa fa-chevron-left"></i></a>
 	<a hidden href="/new_post" class="icon right"><i class="fa fa-plus"></i></a>
 	<h2 class="title">Nuevo Equipo</h2>
@@ -31,83 +32,92 @@
 <div class="fake_body">
 	<div class="login_form register">
 		<form id="form_register">
-		
-		<div class="image_container" style="background-image:url(<?=$url?>);">
-			<input type="file" accept=".jpg, .jpeg, .png, .gif"/>
-		</div>
-		<br>
-		<input type="text" name="nombre" required placeholder="Nombre del Equipo">
-		<br>
-		<br>
-		<textarea name="descripcion" maxlength='250' required placeholder="Descripción"></textarea>
-		<br>
-		<select name="tipo" required>
-			<option value="">Tipo de Futbol</option>
-			<option value="5">Futbol 5</option>
-			<option value="9">Futbol 9</option>
-			<option value="11">Futbol 11</option>
-		</select>
-		<div style="display:flex;margin: 20px 0;">
-			<b>Participantes</b>
-			<a href="#" class="invitar">Invitar</a>
-		</div>
-		<table class="table_seleccionados">
-			<tr  data-id="<?=$user->ID?>">
-				<td width="40px"><img src="<?=empty($user->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $user->profile_picture?>" width="40px"/></td>
-				<td width=""><?=$user->nombre. ' ' .$user->apellido?></td>
-				<td width="30px"><a href="#" class="delete_user" style="color:#cb0505;font-size:25px;"><i class="fa fa-times-circle"></i></a></td>
-			</tr>
-		</table>
-		<p><button type="submit">Crear Equipo</button></p>
-	</form>
+
+			<div class="image_container" style="background-image:url(<?= $url ?>);">
+				<input type="file" accept=".jpg, .jpeg, .png, .gif" />
+			</div>
+			<br>
+			<input type="text" name="nombre" required placeholder="Nombre del Equipo">
+			<br>
+			<br>
+			<textarea name="descripcion" maxlength='250' required placeholder="Descripción"></textarea>
+			<br>
+			<select name="tipo" required>
+				<option value="">Tipo de Futbol</option>
+				<option value="5">Futbol 5</option>
+				<option value="9">Futbol 9</option>
+				<option value="11">Futbol 11</option>
+			</select>
+			<div style="display:flex;margin: 20px 0;">
+				<b>Participantes</b>
+				<a href="#" class="invitar">Invitar</a>
+			</div>
+			<table class="table_seleccionados">
+				<tr data-id="<?= $user->ID ?>">
+					<td width="40px"><img src="<?= empty($user->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $user->profile_picture ?>" width="40px" /></td>
+					<td width=""><?= $user->nombre . ' ' . $user->apellido ?></td>
+					<td width="30px"><a href="#" class="delete_user" style="color:#cb0505;font-size:25px;"><i class="fa fa-times-circle"></i></a></td>
+				</tr>
+			</table>
+			<p><button type="submit">Crear Equipo</button></p>
+		</form>
 	</div>
 </div>
 <?php include 'footer.php' ?>
 <style>
-.table_seleccionados tr:first-child a{
-	display:none;
-}
-.invitar{
-	margin: 0 0 0 10px !important;
-    background: #0d98c7;
-    color: white;
-    padding: 1px 7px;
-    border-radius: 4px;
-    margin-left: 10px;
-}
-	.image_container input[type='file']{
-		width:100%;
-		height:100% !important;
-		opacity:0;
+	.table_seleccionados tr:first-child a {
+		display: none;
 	}
-	.image_container{
-		width:100px;height:100px;
-		background-color:#eee;
-		border-radius:500px;overflow:hidden;
+
+	.invitar {
+		margin: 0 0 0 10px !important;
+		background: #0d98c7;
+		color: white;
+		padding: 1px 7px;
+		border-radius: 4px;
+		margin-left: 10px;
+	}
+
+	.image_container input[type='file'] {
+		width: 100%;
+		height: 100% !important;
+		opacity: 0;
+	}
+
+	.image_container {
+		width: 100px;
+		height: 100px;
+		background-color: #eee;
+		border-radius: 500px;
+		overflow: hidden;
 		background-position: top center;
 		background-size: contain;
-		margin:0 auto;
+		margin: 0 auto;
 	}
-	.fake_body{
-		padding:80px 10px 10px 10px;
+
+	.fake_body {
+		padding: 80px 10px 10px 10px;
 	}
-	.fake_header .icon.right{
+
+	.fake_header .icon.right {
 		position: absolute;
 		top: 10px;
 		right: 15px;
 		color: white;
 		padding: 10px;
-		z-index:5;
+		z-index: 5;
 	}
-	.fake_header .icon.left{
+
+	.fake_header .icon.left {
 		position: absolute;
 		top: 10px;
 		left: 15px;
 		color: white;
 		padding: 10px;
-		z-index:5;
+		z-index: 5;
 	}
-	.fake_header .title{
+
+	.fake_header .title {
 		position: absolute;
 		top: 23px;
 		left: 15px;
@@ -115,7 +125,8 @@
 		text-align: center;
 		width: 93%;
 	}
-	.fake_header{
+
+	.fake_header {
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -124,9 +135,11 @@
 		padding: 5px;
 		color: white;
 		height: 70px;
-	}.detalles{
-		display:none;
-		z-index:5;
+	}
+
+	.detalles {
+		display: none;
+		z-index: 5;
 		position: absolute;
 		top: 54px;
 		left: 0;
@@ -134,12 +147,14 @@
 		height: 100vh;
 		background: white;
 	}
-	.detalles>.header .ok{
-			color: white;
-			padding: 10px;
-			font-size:20px;
+
+	.detalles>.header .ok {
+		color: white;
+		padding: 10px;
+		font-size: 20px;
 	}
-	.detalles>.header{
+
+	.detalles>.header {
 		height: 70px;
 		background: #004454;
 		padding: 10px;
@@ -148,58 +163,65 @@
 		justify-content: space-between;
 		width: 100%;
 	}
-	.invitar_box{
-		display:none;
-		z-index:3;
+
+	.invitar_box {
+		display: none;
+		z-index: 3;
 		position: absolute;
-    top: 54px;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: white;
+		top: 54px;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: white;
 	}
-	.invitar_box>.header{
+
+	.invitar_box>.header {
 		height: 70px;
-    background: #004454;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+		background: #004454;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
 	}
-	.invitar_box>.header>.buscar{
+
+	.invitar_box>.header>.buscar {
 		width: 70%;
-    padding: 10px !important;
-    border-radius: 2px;
-	border:0;
-	margin:0;
+		padding: 10px !important;
+		border-radius: 2px;
+		border: 0;
+		margin: 0;
 	}
-	.invitar_box>.header>.ok{
+
+	.invitar_box>.header>.ok {
 		display: inline-block;
-    width: 40px;
-    height: 40px;
-    background: white;
-    line-height: 30px;
-    text-align: center;
-    border-radius: 25px;
-    margin: 0;
+		width: 40px;
+		height: 40px;
+		background: white;
+		line-height: 30px;
+		text-align: center;
+		border-radius: 25px;
+		margin: 0;
 	}
-	.invitar_box>.header>.ok>i{
+
+	.invitar_box>.header>.ok>i {
 		font-size: 20px;
-    margin-top: 10px;
+		margin-top: 10px;
 	}
-	.invitar_box>.body{
-		background: rgba(255,255,255,.7);
+
+	.invitar_box>.body {
+		background: rgba(255, 255, 255, .7);
 		height: calc(100vh - 70px);
 		padding: 20px;
 		overflow: auto;
 	}
-	.view_player{
-		font-size:20px;
-		color:blue;
+
+	.view_player {
+		font-size: 20px;
+		color: blue;
 	}
-	
-	.badge .nombre{
+
+	.badge .nombre {
 		position: absolute;
 		top: 139px;
 		left: 0;
@@ -209,33 +231,40 @@
 		color: #312601;
 		text-align: center;
 	}
-	.badge table tr td{
-		border:0 !important;
+
+	.badge table tr td {
+		border: 0 !important;
 		padding: 2px !important;
 		color: #312601;
 		font-size: 14px;
 		line-height: 18px;
 	}
-	.badge table{
+
+	.badge table {
 		width: 65px;
 		position: absolute;
 		top: 170px;
 	}
-	.badge table.first{
+
+	.badge table.first {
 		left: 12px;
 	}
-	.badge table:last-child{
+
+	.badge table:last-child {
 		right: 35px;
 	}
-	.text-center{
-		text-align:center;
+
+	.text-center {
+		text-align: center;
 	}
-	.badge .image_container .image{
+
+	.badge .image_container .image {
 		height: 100%;
 		width: 100%;
 		opacity: 0;
 	}
-	.badge .image_container{
+
+	.badge .image_container {
 		width: 90px;
 		height: 90px;
 		background-color: #eee;
@@ -248,7 +277,8 @@
 		left: 85px;
 		margin: 0 auto;
 	}
-	.badge{
+
+	.badge {
 		pointer-events: all;
 		padding: 0 20px;
 		justify-content: center;
@@ -264,51 +294,53 @@
 		margin: 17vh auto 20px auto;
 	}
 </style>
-<div class="invitar_box" >
-<div class="header">	
-<input class="buscar" placeholder="Buscar">
-<a href="#" class="ok">
-	<i class="fa fa-check"></i></a></div>
-<div class="body" ><table class="table_users">
+<div class="invitar_box">
+	<div class="header">
+		<input class="buscar" placeholder="Buscar">
+		<a href="#" class="ok">
+			<i class="fa fa-check"></i></a>
+	</div>
+	<div class="body">
+		<table class="table_users">
 			<tbody>
-			<?php foreach($usuarios as $v):?>
-			<tr>
-				<td width="50px" style="padding-left:10px;">
-					<img src="<?= empty($v->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $v->profile_picture?>" width="40px">
-				</td>
-				<td width=""><?= $v->nombre . ' ' . $v->apellido?></td>
-				<td width="30px">
-					<a href="#" class="view_player"  data-id='<?=$v->id?>'><i class="fa fa-info-circle"></i></a>
-				</td>
-				<td width="30px">
-					<input type="checkbox" style="height: 20px;width: 20px;" data-json='<?=json_encode($v)?>'>
-				</td>
-			</tr>
-			<?php endforeach;?>
-		</tbody>
-	</table>
-    
-    </div>
+				<?php foreach ($usuarios as $v) : ?>
+					<tr>
+						<td width="50px" style="padding-left:10px;">
+							<img src="<?= empty($v->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $v->profile_picture ?>" width="40px">
+						</td>
+						<td width=""><?= $v->nombre . ' ' . $v->apellido ?></td>
+						<td width="30px">
+							<a href="#" class="view_player" data-id='<?= $v->id ?>'><i class="fa fa-info-circle"></i></a>
+						</td>
+						<td width="30px">
+							<input type="checkbox" style="height: 20px;width: 20px;" data-json='<?= json_encode($v) ?>'>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+
+	</div>
 </div>
-<?php add_action( 'wp_footer',function(){?>
-<div class="detalles" >
-<div class="header">	
-	<a href="#" class="ok">
-		<i class="fa fa-chevron-left"></i></a>
-		<h3 style="
+<?php add_action('wp_footer', function () { ?>
+	<div class="detalles">
+		<div class="header">
+			<a href="#" class="ok">
+				<i class="fa fa-chevron-left"></i></a>
+			<h3 style="
     color: white;
     margin-top: 7px;
     margin-left: 7%;
     font-size: 20px;
 ">Detalles del Jugador</h3>
-	</div>
-	<div class="body" style="    background: 50% 40% no-repeat;
-    height: 100vh;">
-		<div class="badge">
-		<div class="image_container player_data profile_picture" >
-			<input type="file" class="image" accept='.jpg,.jpeg,.png, .gif'>
 		</div>
-		<div class="stats top" style="
+		<div class="body" style="    background: 50% 40% no-repeat;
+    height: 100vh;">
+			<div class="badge">
+				<div class="image_container player_data profile_picture">
+					<input type="file" class="image" accept='.jpg,.jpeg,.png, .gif'>
+				</div>
+				<div class="stats top" style="
 				position: absolute;
 				top: 55px;
 				color: #312601;
@@ -317,191 +349,192 @@
 				font-weight: bold;
 				font-size: 31px;
 				line-height: 33px;
-			"><?=@$meta->stats_rw?></div>
+			"><?= @$meta->stats_rw ?></div>
 					<div style="
 				font-size: 20px;
 				line-height: 17px;
 			">VEL</div>
-			
+
+				</div>
+				<div class="nombre player_data"><?= @$meta->nombre ?></div>
+				<table class="first">
+					<tr>
+						<td class="player_data pac"><?= @$meta->stats_pac ?></td>
+						<td>PASE</td>
+					</tr>
+					<tr>
+						<td class="player_data sho"><?= @$meta->stats_sho ?></td>
+						<td>REGATE</td>
+					</tr>
+					<tr>
+						<td class="player_data pas"><?= @$meta->stats_pas ?></td>
+						<td>VISION</td>
+					</tr>
+				</table>
+				<table class="second">
+					<tr>
+						<td class="player_data dri"><?= @$meta->stats_dri ?></td>
+						<td>FUERZA</td>
+					</tr>
+					<tr>
+						<td class="player_data def"><?= @$meta->stats_def ?></td>
+						<td>DEFENSA</td>
+					</tr>
+					<tr>
+						<td class="player_data phy"><?= @$meta->stats_phy ?></td>
+						<td>FÍSICO</td>
+					</tr>
+				</table>
+			</div>
 		</div>
-		<div class="nombre player_data"><?=@$meta->nombre?></div>
-		<table class="first">
-			<tr>
-				<td  class="player_data pac"><?=@$meta->stats_pac?></td>
-				<td>PASE</td>
-			</tr>
-			<tr>
-				<td  class="player_data sho"><?=@$meta->stats_sho?></td>
-				<td>REGATE</td>
-			</tr>
-			<tr>
-				<td  class="player_data pas"><?=@$meta->stats_pas?></td>
-				<td>VISION</td>
-			</tr>
-		</table>
-		<table  class="second">
-			<tr>
-				<td  class="player_data dri"><?=@$meta->stats_dri?></td>
-				<td>FUERZA</td>
-			</tr>
-			<tr>
-				<td  class="player_data def"><?=@$meta->stats_def?></td>
-				<td>DEFENSA</td>
-			</tr>
-			<tr>
-				<td class="player_data phy"><?=@$meta->stats_phy?></td>
-				<td>FÍSICO</td>
-			</tr>
-		</table>
 	</div>
-    </div>
-</div>
-<script>
-jQuery.expr[':'].contains = function(a, i, m) {
-  return jQuery(a).text().toUpperCase()
-      .indexOf(m[3].toUpperCase()) >= 0;
-};
-	jQuery(function($){	
-		$('.detalles .ok').on('click',function(e){
-			e.preventDefault()
-			$('.detalles').fadeOut()
-		});
-		$('.view_player').on('click',function(e){
-			e.preventDefault()
-			$('.detalles').css('top',$(document).scrollTop()+'px')
-			$('.detalles .body').css('background-image','url(https://markoh.myappi.net/wp-content/uploads/2021/05/loading-buffering.gif)')
-			$('.detalles .badge').hide()
-			$('.detalles').fadeIn()
-			var id = $(this).data("id")
-			$.post(
-				'/wp-admin/admin-ajax.php?action=custom_ajax&id_player='+id+'&caction=get_player',null,
-				function(r){
-					console.info(r.data.profile_picture)
-					if(typeof r.data.profile_picture != 'undefined')
-						$(".player_data.profile_picture").css('background-image','url('+r.data.profile_picture+')')
-					else
-						$(".player_data.profile_picture").css('background-image','url(https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png)')
-					
-					$(".player_data.nombre").html(r.data.nombre);
-					$(".player_data.rw").html( r.data.stats_rw);
-					$(".player_data.def").html(r.data.stats_def);
-					$(".player_data.dri").html(r.data.stats_dri);
-					$(".player_data.pas").html(r.data.stats_pas);
-					$(".player_data.pac").html(r.data.stats_pac);
-					$(".player_data.phy").html(r.data.stats_phy);
-					$(".player_data.sho").html(r.data.stats_sho);
-						
-					$('.detalles  .body').css('background-image','')
-					$('.detalles .badge').fadeIn()
-				},
-				'json'
-			);
-		});
-		$('body').on('click','.delete_user',function(e){
-			e.preventDefault()
-			$(this).parents('tr').remove()
-		});
-		$('.table_users tr input[type="checkbox"]').on('click',function(){
-			if($(this).is(":checked"))
-				$(this).parents('tr').css("background-color",'#ffff8d')
-			else
-				$(this).parents('tr').css("background-color",'transparent')
-		})
-		
-		$(".invitar_box .buscar").on('keyup',function(e){
-			var v = $(this).val()
-			if(v==''){
-				$('.table_users tr').show()
-			}else{
-				$('.table_users tr').hide()
-				$('.table_users tr:contains('+v+')').show()
-			}
-		})
-		$(".invitar").on('click',function(e){
-			e.preventDefault()
-			$(".invitar_box").show();
-			$(".invitar_box").css('top',$(window).scrollTop()+"px");
-			$("html").css('overflow','hidden');
-		});
-		$(".invitar_box>.header>.ok").on('click',function(e){
-			e.preventDefault()
-			
-			// usuarios marcados
-			jQuery(".table_seleccionados tr").not(':first-child').remove();
-			$(".table_users input[type='checkbox']:checked").each(function(){
-				var clone = $(".table_seleccionados tr:first-child").clone();
-				var json = $(this).data('json');
-				clone.attr("data-id",json.id);
-				var img = (json.profile_picture==null || json.profile_picture=='' || typeof json.profile_picture == 'undefined') ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : json.profile_picture;
-				clone.find("img").attr("src",json.profile_picture);
-				clone.find("td:nth-child(2)").html(json.nombre + ' ' + json.apellido);
-				clone.appendTo('.table_seleccionados');
+	<script>
+		jQuery.expr[':'].contains = function(a, i, m) {
+			return jQuery(a).text().toUpperCase()
+				.indexOf(m[3].toUpperCase()) >= 0;
+		};
+		jQuery(function($) {
+			$('.detalles .ok').on('click', function(e) {
+				e.preventDefault()
+				$('.detalles').fadeOut()
 			});
-			$("html").css('overflow','auto');
-			jQuery(document).scrollTo(10000000)
-			$(".invitar_box").hide();
-		});
-		$("input[type='file']").on('change',function(e){
-			var input = this;
-			var url = $(this).val();
-			var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
-			$('.image_container').css('opacity', ".6");
-			if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) 
-			{
-				var reader = new FileReader();
-		
-				reader.onload = function (e) {
-					$('.image_container').css('background-image', "url("+e.target.result+")");
+			$('.view_player').on('click', function(e) {
+				e.preventDefault()
+				$('.detalles').css('top', $(document).scrollTop() + 'px')
+				$('.detalles .body').css('background-image', 'url(https://markoh.myappi.net/wp-content/uploads/2021/05/loading-buffering.gif)')
+				$('.detalles .badge').hide()
+				$('.detalles').fadeIn()
+				var id = $(this).data("id")
+				$.post(
+					'/wp-admin/admin-ajax.php?action=custom_ajax&id_player=' + id + '&caction=get_player', null,
+					function(r) {
+						console.info(r.data.profile_picture)
+						if (typeof r.data.profile_picture != 'undefined')
+							$(".player_data.profile_picture").css('background-image', 'url(' + r.data.profile_picture + ')')
+						else
+							$(".player_data.profile_picture").css('background-image', 'url(https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png)')
+
+						$(".player_data.nombre").html(r.data.nombre);
+						$(".player_data.rw").html(r.data.stats_rw);
+						$(".player_data.def").html(r.data.stats_def);
+						$(".player_data.dri").html(r.data.stats_dri);
+						$(".player_data.pas").html(r.data.stats_pas);
+						$(".player_data.pac").html(r.data.stats_pac);
+						$(".player_data.phy").html(r.data.stats_phy);
+						$(".player_data.sho").html(r.data.stats_sho);
+
+						$('.detalles  .body').css('background-image', '')
+						$('.detalles .badge').fadeIn()
+					},
+					'json'
+				);
+			});
+			$('body').on('click', '.delete_user', function(e) {
+				e.preventDefault()
+				$(this).parents('tr').remove()
+			});
+			$('.table_users tr input[type="checkbox"]').on('click', function() {
+				if ($(this).is(":checked"))
+					$(this).parents('tr').css("background-color", '#ffff8d')
+				else
+					$(this).parents('tr').css("background-color", 'transparent')
+			})
+
+			$(".invitar_box .buscar").on('keyup', function(e) {
+				var v = $(this).val()
+				if (v == '') {
+					$('.table_users tr').show()
+				} else {
+					$('.table_users tr').hide()
+					$('.table_users tr:contains(' + v + ')').show()
+				}
+			})
+			$(".invitar").on('click', function(e) {
+				e.preventDefault()
+				$(".invitar_box").show();
+				$(".invitar_box").css('top', $(window).scrollTop() + "px");
+				$("html").css('overflow', 'hidden');
+			});
+			$(".invitar_box>.header>.ok").on('click', function(e) {
+				e.preventDefault()
+
+				// usuarios marcados
+				jQuery(".table_seleccionados tr").not(':first-child').remove();
+				$(".table_users input[type='checkbox']:checked").each(function() {
+					var clone = $(".table_seleccionados tr:first-child").clone();
+					var json = $(this).data('json');
+					clone.attr("data-id", json.id);
+					var img = (json.profile_picture == null || json.profile_picture == '' || typeof json.profile_picture == 'undefined') ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : json.profile_picture;
+					clone.find("img").attr("src", json.profile_picture);
+					clone.find("td:nth-child(2)").html(json.nombre + ' ' + json.apellido);
+					clone.appendTo('.table_seleccionados');
+				});
+				$("html").css('overflow', 'auto');
+				jQuery(document).scrollTo(10000000)
+				$(".invitar_box").hide();
+			});
+			$("input[type='file']").on('change', function(e) {
+				var input = this;
+				var url = $(this).val();
+				var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+				$('.image_container').css('opacity', ".6");
+				if (input.files && input.files[0] && (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+					var reader = new FileReader();
+
+					reader.onload = function(e) {
+						$('.image_container').css('background-image', "url(" + e.target.result + ")");
+						$('.image_container').css('opacity', "1");
+					}
+					reader.readAsDataURL(input.files[0]);
+				} else {
 					$('.image_container').css('opacity', "1");
 				}
-				reader.readAsDataURL(input.files[0]);
-			}else{
-				$('.image_container').css('opacity', "1");
-			}
-		})
-		$('form#form_register').on('submit',function(e){
-			e.preventDefault()
-			
-			var form_data = new FormData();
-			
-			var totalfiles = document.querySelector('[type="file"]').files.length;
-			for (var index = 0; index < totalfiles; index++) {
-				form_data.append("files[]", document.querySelector('[type="file"]').files[index]);
-			}
-			
-			$("form#form_register").serializeArray().forEach(function(field){
-				form_data.append(field.name ,field.value);
 			})
-			
-			var usuarios = [];
-			jQuery(".table_seleccionados tr").each(function(){
-				usuarios.push($(this).attr('data-id'));
-				
-			})
-			form_data.append("usuarios" ,usuarios.join());
-			
-			//$("#form_register").css("opacity",.5); 
-			// AJAX request
-			$.ajax({
-				url: '/wp-admin/admin-ajax.php?action=custom_ajax&caction=new_team', 
-				type: 'post',
-				data: form_data,
-				dataType: 'json',
-				contentType: false,
-				processData: false,
-				error: function (a,b,c) {alert('Ha ocurrido un error inesperado. Intente más tarde o contacte al servicio técnico.')},
-				success: function (r) {
-					alert(r.message);
-					if(r.success)
-						window.location.href='/my_team';
-				},
-				complete: function(){ 
-					$("#form_register").css("opacity",1); 
-					$("#form_register").find("button[type='submit']").prop("disabled",false); 
+			$('form#form_register').on('submit', function(e) {
+				e.preventDefault()
+
+				var form_data = new FormData();
+
+				var totalfiles = document.querySelector('[type="file"]').files.length;
+				for (var index = 0; index < totalfiles; index++) {
+					form_data.append("files[]", document.querySelector('[type="file"]').files[index]);
 				}
+
+				$("form#form_register").serializeArray().forEach(function(field) {
+					form_data.append(field.name, field.value);
+				})
+
+				var usuarios = [];
+				jQuery(".table_seleccionados tr").each(function() {
+					usuarios.push($(this).attr('data-id'));
+
+				})
+				form_data.append("usuarios", usuarios.join());
+
+				//$("#form_register").css("opacity",.5); 
+				// AJAX request
+				$.ajax({
+					url: '/wp-admin/admin-ajax.php?action=custom_ajax&caction=new_team',
+					type: 'post',
+					data: form_data,
+					dataType: 'json',
+					contentType: false,
+					processData: false,
+					error: function(a, b, c) {
+						alert('Ha ocurrido un error inesperado. Intente más tarde o contacte al servicio técnico.')
+					},
+					success: function(r) {
+						alert(r.message);
+						if (r.success)
+							window.location.href = '/my_team';
+					},
+					complete: function() {
+						$("#form_register").css("opacity", 1);
+						$("#form_register").find("button[type='submit']").prop("disabled", false);
+					}
+				});
+				return false;
 			});
-			return false;
-		});
-	})
-</script>
+		})
+	</script>
 <?php }); ?>

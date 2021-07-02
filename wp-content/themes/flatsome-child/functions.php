@@ -693,7 +693,79 @@ function custom_ajax()
 				$r ? $response = ['success' => true, 'data' => $r] : $response = ['success' => false, 'data' => 'null'];
 
 				break;
-				
+
+			case "filter_search":
+				switch ($_REQUEST['screen']) {
+					case 'jugadores':
+						if ($_REQUEST['value'] == "") {
+							$wp_users = $wpdb->get_results("SELECT ID FROM wp_users"); //Consulta para contar cuantos usuarios hay registrados
+							$users = array();
+							$aux = array();
+
+							foreach ($wp_users as $u) {
+								array_push($aux, get_user_meta($u->ID));
+							}
+
+							foreach ($aux as $us) {
+								//Valida si es jugador
+								if (!strpos($us['wp_capabilities'][0], "jugador")) {
+									continue;
+								} else {
+									array_push($users, $us);
+								}
+							}
+
+							$response = ['success' => true,  "data" => $users];
+						} else {
+							$wp_users = $wpdb->get_results("SELECT * FROM wp_usermeta WHERE meta_key = 'nombre' AND meta_value LIKE '%" . $_REQUEST['value'] . "%'");
+							$aux = array();
+							$users = array();
+
+							foreach ($wp_users as $u) {
+								array_push($aux, get_user_meta($u->user_id));
+							}
+
+							foreach ($aux as $usu) {
+								//Valida si es jugador
+								if (strpos(!$usu['wp_capabilities'][0], "jugador") || (!isset($usu['profile_picture']))) {
+									continue;
+								} else {
+									array_push($users, $usu);
+								}
+							}
+
+							$response = ['success' => true, "data" => $users];
+						}
+						break;
+
+					case 'equipos':
+						if ($_REQUEST['value'] == "") {
+							$t = $wpdb->get_results("SELECT * FROM wp_teams");
+
+							$teams = array();
+							foreach ($t as $k) {
+								array_push($teams, [$k, get_user_meta($k->creado_por)]);
+							}
+
+							$response = ['success' => true, "data" => $teams];
+						} else {
+							$t = $wpdb->get_results("SELECT * FROM wp_teams WHERE nombre LIKE '%" . $_REQUEST['value'] . "%'");
+
+							$teams = array();
+							foreach ($t as $k) {
+								array_push($teams, [$k, get_user_meta($k->creado_por)]);
+							}
+
+							$response = ['success' => true, "data" => $teams];
+						}
+						break;
+
+					default:
+						$response = ['success' => false, "message" => 'No hay un case que coincida en filter_search'];
+						break;
+				}
+				break;
+
 			default:
 				$response["message"] = "Error de Programación: Acción AJAX Incorrecta";
 				break;
