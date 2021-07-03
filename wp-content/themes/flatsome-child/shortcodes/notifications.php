@@ -148,7 +148,7 @@ $noticias = $wpdb->get_results($query);
 		box-shadow: 2px 2px 10px -1px rgb(0 0 0 / 10%);
 	}
 
-	.delete{
+	.delete {
 		margin-left: 30px;
 	}
 </style>

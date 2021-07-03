@@ -154,7 +154,7 @@ function custom_ajax()
 				$post = $wpdb->get_row("select * from wp_posts where id = {$_REQUEST['post_id']}");
 
 				// datos json de la publicacion
-				$json = json_decode($post->post_content);
+				$json = json_decode(stripslashes($post->post_content));
 
 				// guardamos el usuario que está aceptando la publicacion, dentro de la publicacion
 				$json->respuesta = $usuario;
@@ -195,6 +195,7 @@ function custom_ajax()
 
 				$response = ['success' => true, 'message' => "EXITO:\nSe le ha enviado una notificacion a ambas partes para que finalicen los detalles del encuentro"];
 				break;
+
 			case 'forgot_password':
 				$user = $wpdb->get_row("select * from wp_users where lower(user_login) = '" . strtolower($_REQUEST["email"]) . "' or lower(user_email)  = '" . strtolower($_REQUEST["email"]) . "'");
 
@@ -689,7 +690,7 @@ function custom_ajax()
 				break;
 
 			case "type_of_soccer":
-				$r = $wpdb->get_row("SELECT tipo FROM wp_teams WHERE id = " . $_REQUEST['id_equipo']);
+				$r = $wpdb->get_row("SELECT id, tipo, nombre FROM wp_teams WHERE creado_por = " . $_REQUEST['id']);
 				$r ? $response = ['success' => true, 'data' => $r] : $response = ['success' => false, 'data' => 'null'];
 
 				break;
@@ -727,10 +728,12 @@ function custom_ajax()
 
 							foreach ($aux as $usu) {
 								//Valida si es jugador
-								if (strpos(!$usu['wp_capabilities'][0], "jugador") || (!isset($usu['profile_picture']))) {
-									continue;
+								if (strpos($usu['wp_capabilities'][0], "jugador")) {
+									if (isset($usu['profile_picture'])) {
+										array_push($users, $usu);
+									}
 								} else {
-									array_push($users, $usu);
+									continue;
 								}
 							}
 

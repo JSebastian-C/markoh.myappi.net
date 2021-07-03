@@ -75,7 +75,6 @@ for ($i = 0; $i < count($noticias); $i++) {
 		unset($noticias[$i]);
 	}
 }
-
 ?>
 <div class="fake_header">
 	<a href="/start" class="icon left"><i class="fa fa-chevron-left"></i></a>
@@ -85,7 +84,7 @@ for ($i = 0; $i < count($noticias); $i++) {
 <div class="fake_body">
 	<?php if (count($noticias)) : ?>
 		<?php foreach ($noticias as $v) : ?>
-			<?php $data = json_decode($v->json_data); ?>
+			<?php $data = json_decode(stripslashes($v->json_data)); ?>
 			<div class="noticia">
 				<?php if ($data->tipo_publicacion == 'equipo') : ?>
 					<h3>¡<?= strtoupper($data->equipo->nombre) ?> busca Match!</h3>
@@ -139,7 +138,7 @@ for ($i = 0; $i < count($noticias); $i++) {
 					<?php endif; ?>
 					<div class="actions">
 						<?php if ($v->autor != $user->ID) : ?>
-							<a class="button primary is-xsmall pedir" id="btn-convocar"  data-id="<?= $v->id ?>" data-post='<?= json_encode($v) ?>' data-anuncio='<?= json_encode($v) ?>'> <span>¡Convocar!</span> </a>
+							<a class="button primary is-xsmall pedir" id="btn-convocar" data-id="<?= $v->id ?>" data-post='<?= json_encode($v) ?>' data-anuncio='<?= json_encode($v) ?>'> <span>¡Convocar!</span> </a>
 						<?php endif; ?>
 						<?php if ($v->autor == $user->ID) : ?>
 							<a href="#" class="button alert is-xsmall delete" id="btn-eliminar" data-id="<?= $v->id ?>"><i class="fa fa-trash"></i> Eliminar</a>
@@ -266,7 +265,8 @@ for ($i = 0; $i < count($noticias); $i++) {
 		box-shadow: 2px 2px 10px -1px rgb(0 0 0 / 10%);
 	}
 
-	#btn-eliminar, #btn-convocar{
+	#btn-eliminar,
+	#btn-convocar {
 		margin-top: 10px;
 	}
 </style>
@@ -285,10 +285,9 @@ for ($i = 0; $i < count($noticias); $i++) {
 						},
 						function(r) {
 							alert(r.message);
-							if (r.success)
+							if (r.success) {
 								window.location.reload();
-
-
+							}
 						}, "json")
 				}
 			});
@@ -303,10 +302,9 @@ for ($i = 0; $i < count($noticias); $i++) {
 						},
 						function(r) {
 							alert(r.message);
-							if (r.success)
+							if (r.success) {
 								window.location.href = "/notifications";
-
-
+							}
 						}, "json")
 				}
 			});
@@ -321,10 +319,9 @@ for ($i = 0; $i < count($noticias); $i++) {
 						},
 						function(r) {
 							alert(r.message);
-							if (r.success)
+							if (r.success) {
 								window.location.href = "/notifications";
-
-
+							}
 						}, "json")
 				}
 			});

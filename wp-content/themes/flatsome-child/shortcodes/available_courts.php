@@ -14,8 +14,6 @@
 <div class="fake_body">
 	<?php if(count($equipos)):?>
 		<?php foreach($equipos as $v):?>
-			
-			
 			<div class="noticia">
 				<div class="image_container" style="background-image:url(<?=!empty($v->logo_url) ? $v->logo_url : "https://markoh.myappi.net/wp-content/uploads/2021/05/markoh-image-banner-1.png" ?>);"></div>
 				<h3><?=$v->nombre?></h3>

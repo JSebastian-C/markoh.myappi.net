@@ -11,6 +11,7 @@ $query = "
 				t.creado_por = {$user->ID}";
 
 $equipos = $wpdb->get_results($query);
+$canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 ?>
 
 <div class="fake_header">
@@ -39,19 +40,26 @@ $equipos = $wpdb->get_results($query);
 					<option value="Portero">Portero</option>
 				</select>
 			</div>
-			<div class="equipo" required style="display: none;">
+			<div class="equipo" style="display: none;">
 				<b>Selecciona tu equipo</b>
-				<select name="equipo" id="equipo_s">
+				<select name="equipo" id="equipo_s" required>
 					<option value="">Seleccionar</option>
 					<?php foreach ($equipos as $v) : ?>
 						<option value="<?= $v->id ?>"> <?= $v->nombre ?> </option>
 					<?php endforeach; ?>
 				</select>
-
 				<!-- En la etiqueta <p> se muestra el tipo de futbol que juega el equipo seleccionado -->
 				<em id="aux_tipo_futbol"></em>
 			</div>
-			</select>
+			<div class="s_cancha" style="display: none;">
+				<b>Selecciona la cancha donde quieres jugar</b>
+				<select name="cancha" required>
+					<option value="">Seleccionar</option>
+					<?php foreach ($canchas as $c) : ?>
+						<option value="<?= $c->id ?>"> <?= $c->nombre ?> </option>
+					<?php endforeach; ?>
+				</select>
+			</div>
 			<b>Ciudad</b>
 			<input type="text" name="ciudad" required>
 			<br>
@@ -119,19 +127,39 @@ $equipos = $wpdb->get_results($query);
 		height: 70px;
 	}
 </style>
-<?php add_action('wp_footer', function () { ?>
+<?php add_action('wp_footer', function () {
+	global $wpdb;
+	global $user;
+?>
 	<script>
 		jQuery(function($) {
+			let tipo_futbol = <?= json_encode($wpdb->get_results("SELECT * FROM wp_teams WHERE creado_por = " . $user->ID)) ?>;
+			
+			//Muestra que tipo de futbol juega el equipo seleccionado
+			$("#equipo_s").change(function() {
+				if ($('#equipo_s').val() == '') {
+					$("#aux_tipo_futbol").html(null);
+				} else {
+					tipo_futbol.forEach(e => {
+						if (e.id == $('#equipo_s').val()) {
+							$("#aux_tipo_futbol").html("El equipo seleccionado juega futbol " + e.tipo);
+						}
+					});
+				}
+			});
+
 			$('[name="tipo_publicacion"]').on('change', function(e) {
-				alert($(this).val)
 				if ($(this).val() == 'partido') {
 					$('.partido').show();
 					$('.equipo').hide();
+					$('.s_cancha').hide();
 				} else {
 					$('.partido').hide();
+					$('.s_cancha').show();
 					$('.equipo').show();
 				}
 			});
+
 			$('form#form_register').on('submit', function(e) {
 				e.preventDefault();
 				var data = $(this).serialize();
@@ -232,25 +260,6 @@ $equipos = $wpdb->get_results($query);
 					}
 					$('input.url_aplicacion').removeClass('input_loading');
 				}, 'json')
-
-
-			});
-
-			$("#equipo_s").change(function() {
-				var id_equipo = $(this).val();
-				var aux;
-
-				if (id_equipo == '') {
-					$("#aux_tipo_futbol").html(null);
-				} else {
-					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=type_of_soccer', {
-							'id_equipo': id_equipo
-						},
-						function(r) {
-							$("#aux_tipo_futbol").html("El equipo seleccionado juega futbol " + r.data.tipo);
-						}
-					)
-				}
 			});
 		})
 	</script>

@@ -19,20 +19,20 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
         <div class="sections" style="font-size: 15;">
             <div>
                 <input placeholder="Buscar" class="input" />
-                <a type="button"><i class="fa fa-close"></i></a>
+                <a class="B_clear" type="button"><i class="fa fa-close"></i></a>
             </div>
 
             <article class="jugadores">
                 <table class="table_players">
                     <thead id="thead_players"></thead>
-                    <tbody class="tbody" id="tbody_players"></tbody>
+                    <tbody class="tbody_players" id="tbody_players"></tbody>
                 </table>
             </article>
 
             <article class="equipos">
                 <table class="table_teams">
                     <thead id="thead_teams"></thead>
-                    <tbody class="tbody" id="tbody_teams"></tbody>
+                    <tbody class="tbody_teams" id="tbody_teams"></tbody>
                 </table>
             </article>
         </div>
@@ -132,7 +132,7 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
             margin-bottom: 15px;
         }
 
-        .sections div a {
+        .B_clear {
             background-color: red;
             color: #FFF;
             margin-left: 5px;
@@ -140,6 +140,10 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
             padding-right: 15px;
             padding-top: 1px;
             border-radius: 5px;
+        }
+
+        .B_clear:hover {
+            color: #FFF;
         }
 
         .input {
@@ -166,17 +170,57 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
             margin-right: 15px;
         }
 
-        #div_img_players {
+        #img_players {
             display: flex;
         }
 
-        #div_img_teams {
-            height: 50px;
-            width: 100px;
+        #img_teams {
+            height: 90px;
+            width: 90px;
         }
 
-        #td_teamsRow {
+        #teamsRow {
             display: flex;
+            padding: 10px;
+        }
+
+        #teamName {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .whatsapp_players span,
+        .whatsapp_teams span {
+            color: white;
+            font-weight: bold;
+            font-size: 17px;
+            vertical-align: middle;
+        }
+
+        .whatsapp_players img,
+        .whatsapp_teams img {
+            height: 25px;
+            width: 25px;
+            margin-right: 3px;
+        }
+
+        .whatsapp_players,
+        .whatsapp_teams {
+            border-radius: 5px;
+            text-align: center;
+            margin: 10px 0;
+            white-space: nowrap;
+            background: #1bd741;
+            padding: 0 10px;
+            display: inline-block;
+        }
+
+        .whatsapp_players {
+            height: 85%;
+        }
+
+        #data_user {
+            margin-top: 10px;
         }
     </style>
     <script>
@@ -220,7 +264,7 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
                 $('.input').val('');
                 clean_button();
                 get_Data();
-                $('.tbody').empty();
+                //$('.tbody').empty();
             });
 
             //Se manejan los valores que se escriben en el input para filtrar los datos
@@ -235,19 +279,29 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
                         'value': ($('.input').val() == "" ? "" : $('.input').val())
                     },
                     function(r) {
-                        //Limpia el tbody antes de mostrar otros datos
-                        $('.tbody').empty();
-
                         switch (articleActive) {
                             case 'jugadores':
+                                //Limpia el tbody antes de mostrar otros datos
+                                $('.tbody_players').empty();
+
                                 r.data.forEach(e => {
+                                    let num = "<a target='blank' href='whatsapp://send?phone=57" + e.telefono + "' class='whatsapp_players'>" +
+                                        "<img src='" + window.location.origin + "/wp-content/uploads/2021/05/whatsapp_icon.png'>" +
+                                        "<span>" + e.telefono + "</span>" +
+                                        "</a>";
+
                                     aux =
                                         "<tr>" +
-                                        "<td><div id='div_img_players'><img src='" + (e.profile_picture == "" || e.profile_picture == undefined ? window.location.origin + "/wp-content/uploads/2021/05/user_avatar.png" : e.profile_picture) + "'/>" +
-                                        "<div>" + e.nombre[0] + " " + e.apellido[0] +
+                                        "<td>" +
+                                        "<div id='img_players'>" +
+                                        "<img src='" + (e.profile_picture == "" || e.profile_picture == undefined ? window.location.origin + "/wp-content/uploads/2021/05/user_avatar.png" : e.profile_picture) + "'/>" +
+                                        "<div id='data_user'>" +
+                                        e.nombre[0] + " " + e.apellido[0] +
                                         "<br>" + (e.posicion == "" || e.posicion == undefined ? "" : e.posicion) +
-                                        "<br>" + (e.telefono == "" || e.telefono == undefined ? "" : e.telefono) + "</div></div></td>" +
-
+                                        "</div>" +
+                                        "</div>" +
+                                        "<br />" + (e.telefono == undefined || e.telefono == "" ? "" : num) +
+                                        "</td>" +
 
                                         "<td id='secondTD'>" +
                                         "Pase: " + (e.stats_pac == undefined ? "0" : e.stats_pac) +
@@ -259,29 +313,39 @@ $directory = "/wp-content/uploads/2021/05/user_avatar.png";
                                         "</td>" +
                                         "</tr>";
 
-                                    $('.tbody').append(aux);
+                                    $('.tbody_players').append(aux);
                                 });
                                 break;
 
                             case 'equipos':
+                                //Limpia el tbody antes de mostrar otros datos
+                                $('.tbody_teams').empty();
+
                                 r.data.forEach(e => {
-                                    console.log(e[0].logo_url)
+                                    let num = "<a target='blank' href='whatsapp://send?phone=57" + e[1].telefono + "' class='whatsapp_teams'>" +
+                                        "<img src='" + window.location.origin + "/wp-content/uploads/2021/05/whatsapp_icon.png'>" +
+                                        "<span>" + e[1].telefono + "</span>" +
+                                        "</a>";
+
                                     aux =
-                                        "<>" +
-                                        "<td id='td_teamsRow'>" +
-                                        "<div id='div_img_teams'>" +
-                                        "<img src='" + (e[0].logo_url == "" || e[0].logo_url == undefined ? window.location.origin + "/wp-content/uploads/2021/05/cancha.png" : e[0].logo_url) + "'/>" +
-                                        "</div>" +
+                                        "<tr id='teamsRow'>" +
+
+                                        "<td>" +
                                         "<div>" +
-                                        "<br /><p>" + e[0].nombre + "</p>" +
-                                       /*  "<br /><p>" + e[0].descripcion + "</p>" +
-                                        "<br /><p>Futbol " + e[0].tipo + "</p>" +
-                                        "<br /><p>Tel: " + e[1].telefono + "</p>" +
+                                        "<img id='img_teams' src='" + (e[0].logo_url == "" || e[0].logo_url == undefined ? window.location.origin + "/wp-content/uploads/2021/05/cancha.png" : e[0].logo_url) + "'/>" +
                                         "</div>" +
-                                        "</td>" + */
+                                        "</td>" +
+
+                                        "<td>" +
+                                        "<p id='teamName'>" + e[0].nombre + "</p>" +
+                                        "<p>" + e[0].descripcion + "</p>" +
+                                        "<p>Futbol " + e[0].tipo + "</p>" +
+                                        (e[1].telefono == undefined || e[1].telefono == "" ? "" : num) +
+                                        "</td>" +
+
                                         "</tr>";
 
-                                    $('.tbody').append(aux);
+                                    $('.tbody_teams').append(aux);
                                 });
                                 break;
 
