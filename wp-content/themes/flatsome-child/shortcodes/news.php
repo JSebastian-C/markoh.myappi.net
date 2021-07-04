@@ -80,7 +80,6 @@ switch ($user->roles[0]) {
 				if (json_decode(stripslashes($jugador_n[$x]->json_data))->tipo_publicacion == 'partido') {
 					$noticias[$x] = [$jugador_n[$x]];
 				}
-
 			} else {
 				if (json_decode(stripslashes($jugador_n[$x]->json_data))->tipo_publicacion == 'equipo') {
 					$datos_cancha = $wpdb->get_row("SELECT * FROM wp_courts WHERE id = " . json_decode(stripslashes($jugador_n[$x]->json_data))->cancha);
@@ -542,10 +541,11 @@ switch ($user->roles[0]) {
 				e.preventDefault();
 				var post = $(this).data('post')
 				var anuncio = $(this).data('anuncio')
+
 				if (confirm("¿Está seguro que quiere pedir a este jugador?")) {
 					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=pedir_jugador', {
 							"user_id": <?= $user->ID ?>,
-							"post_id": post.id
+							"post_id": anuncio.id
 						},
 						function(r) {
 							alert(r.message);

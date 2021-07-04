@@ -162,7 +162,7 @@ $noticias = $wpdb->get_results($query);
 
 				if (confirm("¿Está seguro que quiere eliminar ésta notificación?")) {
 					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=delete_notification', {
-							user_id: <?= $user->ID ?>,
+							"user_id": <?= $user->ID ?>,
 							"id": id
 						},
 						function(r) {
