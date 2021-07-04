@@ -167,11 +167,12 @@ $noticias = $wpdb->get_results($query);
 						},
 						function(r) {
 							alert(r.message);
-							if (r.success)
+							if (r.success) {
 								window.location.reload();
+							}
 
-
-						}, "json")
+						}, "json"
+					)
 				}
 			});
 		})

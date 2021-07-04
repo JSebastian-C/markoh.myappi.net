@@ -13,7 +13,6 @@ $query = "
 $equipos = $wpdb->get_results($query);
 $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 ?>
-
 <div class="fake_header">
 	<a href="/news" class="icon left"><i class="fa fa-chevron-left"></i></a>
 	<a hidden href="/new_post" class="icon right"><i class="fa fa-plus"></i></a>
@@ -43,18 +42,18 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 			<div class="equipo" style="display: none;">
 				<b>Selecciona tu equipo</b>
 				<select name="equipo" id="equipo_s" required>
-					<option value="">Seleccionar</option>
+					<option value=" ">Seleccionar</option>
 					<?php foreach ($equipos as $v) : ?>
 						<option value="<?= $v->id ?>"> <?= $v->nombre ?> </option>
 					<?php endforeach; ?>
 				</select>
 				<!-- En la etiqueta <p> se muestra el tipo de futbol que juega el equipo seleccionado -->
-				<em id="aux_tipo_futbol"></em>
+				<div id="aux_tipo_futbol"></div>
 			</div>
 			<div class="s_cancha" style="display: none;">
 				<b>Selecciona la cancha donde quieres jugar</b>
 				<select name="cancha" required>
-					<option value="">Seleccionar</option>
+					<option value=" ">Seleccionar</option>
 					<?php foreach ($canchas as $c) : ?>
 						<option value="<?= $c->id ?>"> <?= $c->nombre ?> </option>
 					<?php endforeach; ?>
@@ -126,6 +125,11 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 		color: white;
 		height: 70px;
 	}
+
+	#estilo_aux_tipo_futbol {
+		margin-top: -15px;
+		margin-bottom: 10px;
+	}
 </style>
 <?php add_action('wp_footer', function () {
 	global $wpdb;
@@ -134,7 +138,7 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 	<script>
 		jQuery(function($) {
 			let tipo_futbol = <?= json_encode($wpdb->get_results("SELECT * FROM wp_teams WHERE creado_por = " . $user->ID)) ?>;
-			
+
 			//Muestra que tipo de futbol juega el equipo seleccionado
 			$("#equipo_s").change(function() {
 				if ($('#equipo_s').val() == '') {
@@ -142,7 +146,7 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 				} else {
 					tipo_futbol.forEach(e => {
 						if (e.id == $('#equipo_s').val()) {
-							$("#aux_tipo_futbol").html("El equipo seleccionado juega futbol " + e.tipo);
+							$("#aux_tipo_futbol").html("<div id='estilo_aux_tipo_futbol'>El equipo seleccionado juega futbol " + e.tipo + "</div>");
 						}
 					});
 				}
@@ -167,13 +171,14 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 					data,
 					function(r) {
 						alert(r.message);
-						if (r.success)
+						if (r.success) {
 							window.location.href = '/news';
-
+						}
 					}, "json")
 
 				return false;
 			});
+
 			$('select.tipo_aplicacion').on('change', function() {
 				var tipo = $(this).val();
 				if (tipo != '') {

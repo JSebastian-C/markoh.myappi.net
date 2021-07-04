@@ -224,15 +224,13 @@ $equipos = $wpdb->get_results($query);
 			$('a.eliminar_equipo').on('click', function(e) {
 				e.preventDefault()
 				if (confirm("¿Desea eliminar el equipo '" + $(this).data('nombre') + "'?")) {
-					$.post("/wp-admin/admin-ajax.php?action=custom_ajax&caction=delete_team&id=" + $(this).data('id')), null,
+					$.post("/wp-admin/admin-ajax.php?action=custom_ajax&caction=delete_team&id=" + $(this).data('id'), null,
 						function(r) {
 							alert(r.message);
 							window.location.reload();
 						}, 'json'
+					)
 				}
-
-				//Refresca la página
-				location.reload();
 			});
 			$('a.opciones').on('click', function(e) {
 				e.preventDefault()

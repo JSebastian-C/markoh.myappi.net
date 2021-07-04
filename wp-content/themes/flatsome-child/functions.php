@@ -146,34 +146,40 @@ function custom_ajax()
 								user_id = {$_REQUEST['user_id']} and 
 								meta_key = 'telefono'
 						) telefono
-						";
+						FROM ";
+
 				// usuario que aceptó la publicacion
+				//$datos_resp = ["equipo_rival" => $_REQUEST['rival'], "datos_otra_cancha" => $_REQUEST['datos_otra_cancha']]);
 				$usuario = $wpdb->get_row($sql);
 
 				// publicacion
 				$post = $wpdb->get_row("select * from wp_posts where id = {$_REQUEST['post_id']}");
 
 				// datos json de la publicacion
-				$json = json_decode(stripslashes($post->post_content));
+				//$json = json_decode(stripslashes($post->post_content));
+				$json = json_decode($post->post_content);
 
 				// guardamos el usuario que está aceptando la publicacion, dentro de la publicacion
 				$json->respuesta = $usuario;
+
 				$update = [
 					'post_status'   => 'pending',
 					'post_content'   => json_encode($json)
 				];
+
 				// actualizamos la publicacion
 				$wpdb->update("wp_posts", $update, ['id' => $_REQUEST['post_id']]);
 
 				// mensaje de la notificacion para el que publicó el match
 				$mensaje =  $usuario->nombre . ' ' . $usuario->apellido . " ha aceptado su solicitud para jugar un match entre equipos";
 				$post->telefono = $usuario->telefono;
+
 				$insert = [
-					'post_author'   => $post->post_author,
-					'post_title'   => "Solicitud de match aceptada",
-					'post_excerpt'   => $mensaje,
-					'post_content'   => json_encode($post),
-					'post_type'   => "markoh_notification",
+					'post_author' => $post->post_author,
+					'post_title' => "Solicitud de match aceptada",
+					'post_excerpt' => $mensaje,
+					'post_content' => json_encode($post),
+					'post_type' => "markoh_notification",
 				];
 
 				// se guarda notificacion para el usuario que hizo la notificacion
@@ -256,6 +262,7 @@ function custom_ajax()
 				break;
 			case "delete_team":
 				$wpdb->delete('wp_teams', ['id' => $_REQUEST['id']]);
+				$wpdb->delete('wp_team_players', ['id_team' => $_REQUEST['id']]);
 				$response = ['success' => true, 'message' => 'Equipo eliminado exitosamente'];
 				break;
 			case "update_team":
@@ -400,8 +407,6 @@ function custom_ajax()
 				];
 				$wpdb->insert('wp_courts', $data);
 
-
-
 				$response = ['success' => true, 'message' => 'Cancha registrada exitosamente'];
 				break;
 
@@ -544,6 +549,7 @@ function custom_ajax()
 				}
 				$response = ['success' => true, 'message' => 'Equipo creado exitosamente'];
 				break;
+
 			case "new_post":
 				date_default_timezone_set('America/Bogota');
 				$vence =  strtotime($_REQUEST['vence'] . " " . $_REQUEST['hora'] . ':00');
@@ -556,6 +562,7 @@ function custom_ajax()
 
 				$_REQUEST['app_post'] = '[[APP_POST]]';
 				$_REQUEST['equipo'] = $wpdb->get_row('select * from wp_teams where id = ' . $_REQUEST['equipo']);
+
 				$data = [
 					'post_title' => 'Se busca ' . $_REQUEST['tipo_publicacion'],
 					'post_content' => json_encode($_REQUEST),
@@ -563,9 +570,11 @@ function custom_ajax()
 					'post_status' => 'publish',
 					'post_date' => $_REQUEST['vence'],
 				];
+
 				wp_insert_post($data);
 				$response = ['success' => true, 'message' => 'Invitación publicada exitosamente'];
 				break;
+
 			case "change_profile_picture":
 				$user = wp_get_current_user();
 

@@ -2,8 +2,9 @@
 global $wpdb;
 global $user;
 $hoy = date('Y-m-d');
+//$hoy = date("y") . "-" . date("m") . "-" . strval(intval(date("d")) - 1);
 $wpdb->get_results("SET lc_time_names = 'es_ES'");
-$query = "
+$query_jugador = "
 			SELECT 
 				p.id,
 				p.post_author autor,
@@ -56,25 +57,68 @@ $query = "
 			  INNER JOIN
 				wp_users u ON p.post_author = u.ID
 			  WHERE
-				p.post_date >= '$hoy' AND 
-				p.post_type = 'markoh_invitacion' and
+			  	p.post_date >= '$hoy' AND 
+			 	p.post_type = 'markoh_invitacion' AND
 				p.post_status not in('pending','accepted')
 			  ORDER BY	
 				p.post_date asc";
 
-$noticias = $wpdb->get_results($query);
+$query_encargado_cancha = "SELECT *	FROM wp_posts WHERE	post_type = 'markoh_notification' AND post_status in('read')";
 
+$jugador_n = $wpdb->get_results($query_jugador);
+$encargado_cancha_n = $wpdb->get_results($query_encargado_cancha);
+$noticias = array();
 
-//Consulta para saber si el usuario hace parte de un equipo
-$estar_en_equipo = count($wpdb->get_row("SELECT * FROM wp_team_players WHERE id_player=" . $user->ID));
+//Filtrado de noticias por rol
+switch ($user->roles[0]) {
+	case 'jugador':
+		//Consulta para saber si el usuario hace parte de un equipo
+		$estar_en_equipo = count($wpdb->get_row("SELECT * FROM wp_team_players WHERE id_player=" . $user->ID));
 
-//Ciclo encargado de modificar la variable "$noticias" para que el usuario que no está en un equipo no vea publicaciones de equipos
-for ($i = 0; $i < count($noticias); $i++) {
+		for ($x = 0; $x < count($jugador_n); $x++) {
+			if ($estar_en_equipo == 0) {
+				if (json_decode(stripslashes($jugador_n[$x]->json_data))->tipo_publicacion == 'partido') {
+					$noticias[$x] = [$jugador_n[$x]];
+				}
 
-	if (($user->roles[0] == 'jugador') && ($estar_en_equipo == 0) && (json_decode($noticias[0]->json_data)->tipo_publicacion == 'equipo')) {
-		unset($noticias[$i]);
-	}
+			} else {
+				if (json_decode(stripslashes($jugador_n[$x]->json_data))->tipo_publicacion == 'equipo') {
+					$datos_cancha = $wpdb->get_row("SELECT * FROM wp_courts WHERE id = " . json_decode(stripslashes($jugador_n[$x]->json_data))->cancha);
+					$noticias[$x] = [$jugador_n[$x], $datos_cancha];
+				} else {
+					$noticias[$x] = [$jugador_n[$x]];
+				}
+			}
+		}
+		break;
+
+	case 'encargado_cancha':
+		for ($j = 0; $j < count($encargado_cancha_n); $j++) {
+			if ((isset(json_decode($encargado_cancha_n[$j]->post_content)->post_date)) && (new DateTime(json_decode($encargado_cancha_n[$j]->post_content)->post_date) >= new DateTime($hoy))) {
+				if (json_decode(stripslashes(json_decode($encargado_cancha_n[$j]->post_content)->post_content))->tipo_publicacion == "equipo") {
+					$noticias[$j] = $encargado_cancha_n[$j];
+				}
+			}
+		}
+		break;
+
+	case 'administrator':
+		//Consulta para saber si el usuario hace parte de un equipo
+		$estar_en_equipo = count($wpdb->get_row("SELECT * FROM wp_team_players WHERE id_player=" . $user->ID));
+
+		for ($i = 0; $i < count($jugador_n); $i++) {
+			if (json_decode(stripslashes($jugador_n[$i]->json_data))->tipo_publicacion == 'equipo' || json_decode(stripslashes($jugador_n[$i]->json_data))->tipo_publicacion == 'partido') {
+				$datos_cancha = $wpdb->get_row("SELECT * FROM wp_courts WHERE id = " . json_decode(stripslashes($jugador_n[$i]->json_data))->cancha);
+			}
+			$noticias[$i] = [$jugador_n[$i], $datos_cancha];
+		}
+		break;
+
+	default:
+		print_r("Algo mal sucede en switch de filtrado de noticias por rol");
+		break;
 }
+
 ?>
 <div class="fake_header">
 	<a href="/start" class="icon left"><i class="fa fa-chevron-left"></i></a>
@@ -82,71 +126,193 @@ for ($i = 0; $i < count($noticias); $i++) {
 	<h2 class="title">Invitaciones</h2>
 </div>
 <div class="fake_body">
-	<?php if (count($noticias)) : ?>
-		<?php foreach ($noticias as $v) : ?>
-			<?php $data = json_decode(stripslashes($v->json_data)); ?>
-			<div class="noticia">
-				<?php if ($data->tipo_publicacion == 'equipo') : ?>
-					<h3>¡<?= strtoupper($data->equipo->nombre) ?> busca Match!</h3>
-					<small><?= ucwords($v->fecha) ?></small>
-					<br>
-					<p>Ciudad: <?= $data->ciudad ?></p>
-					<p>Lugar: <?= $data->lugar ?></p>
+	<!-- Ventana modal que aparece al aceptar un reto -->
+	<div class="mainModal">
+		<div class="childModal">
+			<?php
+			//Se seleccionan mis equipos
+			$mis_equipos = $wpdb->get_results("SELECT * FROM wp_teams WHERE creado_por = {$user->ID}");
 
-					<?php if (!empty($data->anuncio)) : ?>
-						<p><?= $data->anuncio ?></p>
-					<?php endif; ?>
+			?>
 
-					<i></i>
+			<!-- Botón que cierra la ventana modal -->
+			<div class="buttonCloseModal"><i class="fa fa-close"></i></div>
 
-					<div style="font-size:13px;margin: 10px 0;background: #eee;padding: 5px 10px;border-radius: 3px;">
-						<p>
-							Tipo Match: Futbol <?= $data->equipo->tipo ?><br>
-							Publicado por: <?= $v->nombre . ' ' . $v->apellido ?>
-						</p>
+			<div class="containerFormModal">
+				<h3>Ingresa algunos datos adiccionales</h3>
+
+				<!-- Formulario donde estarán los datos de a quien se van a enfrentar y los datos si quieren jugar en otra cancha -->
+				<form class="formModal">
+					<div>
+						<b>Selecciona tu equipo que se enfrentará</b>
+						<select name="equipo_retador" id="equipo_s" required>
+							<option value="">Seleccionar</option>
+							<?php foreach ($mis_equipos as $v) : ?>
+								<option value="<?= $v->id ?>"> <?= $v->nombre ?> </option>
+							<?php endforeach; ?>
+						</select>
+						<!-- En la etiqueta <p> se muestra el tipo de futbol que juega el equipo seleccionado -->
+						<div id="aux_tipo_futbol"></div>
 					</div>
-					<?php if (!empty($v->telefono)) : ?>
-						<a target="blank" href="whatsapp://send?phone=57<?= $v->telefono ?>" class="whatsapp">
-							<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
-							<span><?= $v->telefono ?></span>
-						</a>
-					<?php endif; ?>
-					<div class="actions">
-						<?php if ($v->autor != $user->ID) : ?>
-							<a class="button primary is-xsmall aceptar_reto" data-id="<?= $v->id ?>" data-post='<?= json_encode($v) ?>' data-anuncio='<?= json_encode($data) ?>'> <span>¡Aceptar Reto!</span> </a>
-						<?php endif; ?>
-						<?php if ($v->autor == $user->ID) : ?>
-							<a href="#" class="button alert is-xsmall delete" data-id="<?= $v->id ?>"><i class="fa fa-trash"></i> Eliminar</a>
-						<?php endif; ?>
-					</div>
-				<?php else : ?>
-					<h3>¡<?= $v->nombre . ' ' . $v->apellido ?> quiere jugar como <span><?= ucfirst($data->posicion) ?></span>!</h3>
-					<small><?= ucwords($v->fecha) ?></small><br>
-					<i></i>
-					<p>Ciudad: <?= $data->ciudad ?></p>
-					<p>Lugar: <?= $data->lugar ?></p>
 
-					<?php if (!empty($data->anuncio)) : ?>
-						<p><?= $data->anuncio ?></p>
-					<?php endif; ?>
-
-					<?php if (!empty($v->telefono)) : ?>
-						<a target="blank" href="whatsapp://send?phone=57<?= $v->telefono ?>" class="whatsapp">
-							<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
-							<span><?= $v->telefono ?></span>
-						</a>
-					<?php endif; ?>
-					<div class="actions">
-						<?php if ($v->autor != $user->ID) : ?>
-							<a class="button primary is-xsmall pedir" id="btn-convocar" data-id="<?= $v->id ?>" data-post='<?= json_encode($v) ?>' data-anuncio='<?= json_encode($v) ?>'> <span>¡Convocar!</span> </a>
-						<?php endif; ?>
-						<?php if ($v->autor == $user->ID) : ?>
-							<a href="#" class="button alert is-xsmall delete" id="btn-eliminar" data-id="<?= $v->id ?>"><i class="fa fa-trash"></i> Eliminar</a>
-						<?php endif; ?>
-					</div>
-				<?php endif; ?>
+					<textarea id="textAreaModal" name="datos_otra_cancha" maxlength='200' placeholder="Aquí puedes agregar los datos de una cancha diferente en la que quieras jugar (OPCIONAL)"></textarea>
+					<a><button id="buttonSaveInfo" type="submit">Proceder</button></a>
+				</form>
 			</div>
-		<?php endforeach; ?>
+		</div>
+	</div>
+
+
+	<?php if (count($noticias)) : ?>
+		<?php switch ($user->roles[0]):
+			case 'jugador': ?>
+				<?php foreach ($noticias as $v) : ?>
+					<?php $data = json_decode(stripslashes($v[0]->json_data)) ?>
+					<div class="noticia_jugador">
+						<?php if ($data->tipo_publicacion == 'equipo') : ?>
+							<h3>¡<?= strtoupper($data->equipo->nombre) ?> busca Match!</h3>
+							<small><?= ucwords($v[0]->fecha) ?></small>
+							<br>
+							<p>Ciudad: <?= $data->ciudad ?></p>
+							<p>Lugar: <?= $data->lugar ?></p>
+
+							<?php if (!empty($data->anuncio)) : ?>
+								<p><?= $data->anuncio ?></p>
+							<?php endif; ?>
+
+							<i></i>
+
+							<div style="font-size:13px;margin: 10px 0;background: #eee;padding: 5px 10px;border-radius: 3px;">
+								<p>
+									Tipo Match: Futbol <?= $data->equipo->tipo ?><br>
+									Publicado por: <?= $v[0]->nombre . ' ' . $v[0]->apellido ?><br>
+									<?= isset($v[1]->nombre) ? "Sitio de juego: " .  $v[1]->nombre : null ?>
+								</p>
+							</div>
+							<?php if (!empty($v[0]->telefono)) : ?>
+								<a target="blank" href="whatsapp://send?phone=57<?= $v[0]->telefono ?>" class="whatsapp">
+									<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
+									<span><?= $v[0]->telefono ?></span>
+								</a>
+							<?php endif; ?>
+							<div class="actions">
+								<?php if ($v[0]->autor != $user->ID) : ?>
+									<a class="button primary is-xsmall aceptar_reto" data-id="<?= $v[0]->id ?>" data-post='<?= json_encode($data) ?>' data-anuncio='<?= json_encode($v[0]) ?>'> <span>¡Aceptar Reto!</span> </a>
+								<?php endif; ?>
+								<?php if ($v[0]->autor == $user->ID) : ?>
+									<a href="#" class="button alert is-xsmall delete" data-id="<?= $v[0]->id ?>"><i class="fa fa-trash"></i> Eliminar</a>
+								<?php endif; ?>
+							</div>
+						<?php else : ?>
+							<h3>¡<?= $v[0]->nombre . ' ' . $v[0]->apellido ?> quiere jugar como <span><?= ucfirst($data->posicion) ?></span>!</h3>
+							<small><?= ucwords($v[0]->fecha) ?></small><br>
+							<i></i>
+							<p>Ciudad: <?= $data->ciudad ?></p>
+							<p>Lugar: <?= $data->lugar ?></p>
+
+							<?php if (!empty($data->anuncio)) : ?>
+								<p><?= $data->anuncio ?></p>
+							<?php endif; ?>
+
+							<?php if (!empty($v[0]->telefono)) : ?>
+								<a target="blank" href="whatsapp://send?phone=57<?= $v[0]->telefono ?>" class="whatsapp">
+									<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
+									<span><?= $v[0]->telefono ?></span>
+								</a>
+							<?php endif; ?>
+							<div class="actions">
+								<?php if ($v[0]->autor != $user->ID) : ?>
+									<a class="button primary is-xsmall pedir" id="btn-convocar" data-id="<?= $v[0]->id ?>" data-post='<?= json_encode($data) ?>' data-anuncio='<?= json_encode($v[0]) ?>'> <span>¡Convocar!</span> </a>
+								<?php endif; ?>
+								<?php if ($v[0]->autor == $user->ID) : ?>
+									<a href="#" class="button alert is-xsmall delete" id="btn-eliminar" data-id="<?= $v[0]->id ?>"><i class="fa fa-trash"></i> Eliminar</a>
+								<?php endif; ?>
+							</div>
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+				<?php break; ?>
+
+
+			<?php
+			case 'encargado_cancha': ?>
+				<?php foreach ($noticias as $a_nec) : ?>
+					<div clas="noticia_encargado_cancha">
+						<?php
+						$b_nec = json_decode($a_nec->post_content);
+						$c_nec = json_decode(stripslashes($b_nec->post_content));
+						/* $cap_visitante = $nec->post_author;
+						$cap_local = $d_nec->post_author; */
+						/* var_dump($a_nec);
+						var_dump($b_nec);
+						var_dump($c_nec); */
+						?>
+
+					</div>
+				<?php endforeach; ?>
+				<?php break; ?>
+
+
+			<?php
+			case 'administrator': ?>
+				<?php foreach ($noticias as $v) : ?>
+					<?php $data = json_decode(stripslashes($v[0]->json_data)) ?>
+					<div class="noticia_administrador">
+						<?php if ($data->tipo_publicacion == 'equipo') : ?>
+							<h3>¡<?= strtoupper($data->equipo->nombre) ?> busca Match!</h3>
+							<small><?= ucwords($v[0]->fecha) ?></small>
+							<br>
+							<p>Ciudad: <?= $data->ciudad ?></p>
+							<p>Lugar: <?= $data->lugar ?></p>
+
+							<?php if (!empty($data->anuncio)) : ?>
+								<p><?= $data->anuncio ?></p>
+							<?php endif; ?>
+
+							<i></i>
+
+							<div style="font-size:13px;margin: 10px 0;background: #eee;padding: 5px 10px;border-radius: 3px;">
+								<p>
+									Tipo Match: Futbol <?= $data->equipo->tipo ?><br>
+									Publicado por: <?= $v[0]->nombre . ' ' . $v[0]->apellido ?><br>
+									<?= isset($v[1]->nombre) ? "Sitio de juego: " .  $v[1]->nombre : null ?>
+								</p>
+							</div>
+							<?php if (!empty($v[0]->telefono)) : ?>
+								<a target="blank" href="whatsapp://send?phone=57<?= $v[0]->telefono ?>" class="whatsapp">
+									<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
+									<span><?= $v[0]->telefono ?></span>
+								</a>
+							<?php endif; ?>
+
+						<?php else : ?>
+							<h3>¡<?= $v[0]->nombre . ' ' . $v[0]->apellido ?> quiere jugar como <span><?= ucfirst($data->posicion) ?></span>!</h3>
+							<small><?= ucwords($v[0]->fecha) ?></small><br>
+							<i></i>
+							<p>Ciudad: <?= $data->ciudad ?></p>
+							<p>Lugar: <?= $data->lugar ?></p>
+
+							<?php if (!empty($data->anuncio)) : ?>
+								<p><?= $data->anuncio ?></p>
+							<?php endif; ?>
+
+							<?php if (!empty($v[0]->telefono)) : ?>
+								<a target="blank" href="whatsapp://send?phone=57<?= $v[0]->telefono ?>" class="whatsapp">
+									<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
+									<span><?= $v[0]->telefono ?></span>
+								</a>
+							<?php endif; ?>
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+				<?php break; ?>
+
+
+			<?php
+			default: ?>
+				<em>Error en el switch al mostrar datos con el case de administrador</em>
+				<?php break; ?>
+		<?php endswitch; ?>
 
 	<?php else : ?>
 		<h1>Aún no hay noticias registradas</h1>
@@ -173,6 +339,7 @@ for ($i = 0; $i < count($noticias); $i++) {
 		background: #1bd741;
 		padding: 0 10px;
 		display: inline-block;
+		margin-top: 15px;
 	}
 
 	#section_680879321 {
@@ -229,11 +396,13 @@ for ($i = 0; $i < count($noticias); $i++) {
 		background: #f3f3f3 !important;
 	}
 
-	.noticia h3 span {
+	.noticia_jugador h3 span,
+	.noticia_administrador h3 span {
 		color: rgb(33, 158, 168);
 	}
 
-	.noticia>i {
+	.noticia_jugador>i,
+	.noticia_administrador>i {
 		position: absolute;
 		width: 10px;
 		height: 10px;
@@ -244,17 +413,20 @@ for ($i = 0; $i < count($noticias); $i++) {
 		left: 17px;
 	}
 
-	.noticia h3 {
+	.noticia_jugador h3,
+	.noticia_administrador h3 {
 		font-size: 1.2em;
 		margin: 0;
 	}
 
-	.noticia p {
+	.noticia_jugador p,
+	.noticia_administrador p {
 		margin-bottom: 0;
 		line-height: 17px;
 	}
 
-	.noticia {
+	.noticia_jugador,
+	.noticia_administrador {
 		position: relative;
 		margin: 5px;
 		padding: 10px 20px 10px 40px;
@@ -265,13 +437,87 @@ for ($i = 0; $i < count($noticias); $i++) {
 		box-shadow: 2px 2px 10px -1px rgb(0 0 0 / 10%);
 	}
 
-	#btn-eliminar,
-	#btn-convocar {
-		margin-top: 10px;
+	.mainModal {
+		position: fixed;
+		width: 100%;
+		height: 100vh;
+		background: rgb(0, 0, 0, 0.81);
+		display: none;
+		z-index: 999;
+		margin-left: -10px;
+		margin-top: -80px;
+		padding: 15%;
+		padding-left: 20%;
+		padding-right: 20%;
+	}
+
+	.childModal {
+		/* width: 100%;
+		height: 100%; */
+		/* display: -webkit-inline-flex;
+		display: -moz-inline-flex;
+		display: -ms-inline-flex;
+		display: -o-inline-flex;
+		display: inline-flex; */
+		background-color: #FFF;
+		border-radius: 15px;
+	}
+
+	.buttonCloseModal {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.buttonCloseModal i {
+		background-color: #004454;
+		padding: 8px;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 20px;
+		margin-top: -10px;
+		margin-right: -10px;
+		color: #FFF;
+	}
+
+	.buttonCloseModal i:hover {
+		background-color: grey;
+	}
+
+	.containerFormModal {
+		margin: 3%;
+		margin-top: 0px;
+	}
+
+	.containerFormModal h3 {
+		text-align: center;
+	}
+
+	.formModal {
+		justify-self: center;
+		align-self: center;
+	}
+
+	#estilo_aux_tipo_futbol {
+		margin-top: -15px;
+		margin-bottom: 10px;
+	}
+
+	#textAreaModal {
+		resize: none;
+	}
+
+	#buttonSaveInfo {
+		text-transform: capitalize;
+		background-color: #004454;
+		color: #FFF;
+		border-radius: 5px;
+		width: 100%;
 	}
 </style>
 <?php add_action('wp_footer', function () {
-	global $user; ?>
+	global $user;
+	global $wpdb;
+?>
 	<script>
 		jQuery(function($) {
 			$('.delete').on('click', function(e) {
@@ -280,7 +526,7 @@ for ($i = 0; $i < count($noticias); $i++) {
 
 				if (confirm("¿Está seguro que quiere eliminar ésta invitación?")) {
 					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=delete_post', {
-							user_id: <?= $user->ID ?>,
+							"user_id": <?= $user->ID ?>,
 							"id": id
 						},
 						function(r) {
@@ -291,14 +537,15 @@ for ($i = 0; $i < count($noticias); $i++) {
 						}, "json")
 				}
 			});
+
 			$('.pedir').on('click', function(e) {
 				e.preventDefault();
 				var post = $(this).data('post')
 				var anuncio = $(this).data('anuncio')
 				if (confirm("¿Está seguro que quiere pedir a este jugador?")) {
 					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=pedir_jugador', {
-							user_id: <?= $user->ID ?>,
-							post_id: post.id
+							"user_id": <?= $user->ID ?>,
+							"post_id": post.id
 						},
 						function(r) {
 							alert(r.message);
@@ -308,23 +555,90 @@ for ($i = 0; $i < count($noticias); $i++) {
 						}, "json")
 				}
 			});
+			/* 
+						$('.aceptar_reto').on('click', function(e) {
+							e.preventDefault();
+							var post = $(this).data('post')
+							var anuncio = $(this).data('anuncio')
+
+							if (confirm("¿Está seguro que quiere aceptar el reto de " + anuncio.nombre + " para jugar el " + anuncio.fecha + "?")) {
+								$('.mainModal').fadeIn(); //Abre ventana modal
+
+								$('.formModal').submit(function(e) {
+									e.preventDefault();
+									var data = $(this).serializeArray();
+
+									$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=aceptar_reto_equipo', {
+											"user_id": <?= $user->ID ?>,
+											"post_id": anuncio.id,
+											"rival": data[0].value,
+											"datos_otra_cancha": data[1].value
+										},
+										function(r) {
+											alert(r.message);
+
+											if (r.success) {
+												$('.mainModal').fadeOut(); //Cierra ventana modal	
+												window.location.reload(); //Reinicia los valores del formulario en la ventana modal
+
+
+												//window.location.href = "/notifications";
+											}
+										},
+										"json"
+									);
+								});
+							}
+						}); */
+
+
 			$('.aceptar_reto').on('click', function(e) {
 				e.preventDefault();
 				var post = $(this).data('post')
 				var anuncio = $(this).data('anuncio')
-				if (confirm("¿Está seguro que quiere aceptar el reto de " + anuncio.equipo.nombre + " para jugar el " + post.fecha + "?")) {
+
+				if (confirm("¿Está seguro que quiere aceptar el reto de " + anuncio.nombre + " para jugar el " + anuncio.fecha + "?")) {
+
 					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=aceptar_reto_equipo', {
-							user_id: <?= $user->ID ?>,
-							post_id: post.id
+							"user_id": <?= $user->ID ?>,
+							"post_id": anuncio.id
 						},
 						function(r) {
 							alert(r.message);
+
 							if (r.success) {
 								window.location.href = "/notifications";
 							}
-						}, "json")
+						},
+						"json"
+					);
 				}
 			});
+
+			$('.buttonCloseModal').click(function(e) {
+				e.preventDefault();
+
+				$('.mainModal').fadeOut();
+			})
+
+
+			let tipo_futbol = <?= json_encode($wpdb->get_results("SELECT * FROM wp_teams WHERE creado_por = " . $user->ID)) ?>;
+
+			//Muestra que tipo de futbol juega el equipo seleccionado en la venta modal
+			$("#equipo_s").change(function() {
+				if ($('#equipo_s').val() == '') {
+					$("#aux_tipo_futbol").html(null);
+				} else {
+					tipo_futbol.forEach(e => {
+						if (e.id == $('#equipo_s').val()) {
+							$("#aux_tipo_futbol").html("<div id='estilo_aux_tipo_futbol'>El equipo seleccionado juega futbol " + e.tipo + "</div>");
+						}
+					});
+				}
+			});
+
+			//Acción que se realiza cuando el encargado de cancha agenda un partido
+
 		})
 	</script>
 <?php }); ?>
