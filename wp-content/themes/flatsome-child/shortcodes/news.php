@@ -63,7 +63,7 @@ $query_jugador = "
 			  ORDER BY	
 				p.post_date asc";
 
-$query_encargado_cancha = "SELECT *	FROM wp_posts WHERE	post_type = 'markoh_notification' AND post_status in('read')";
+$query_encargado_cancha = "SELECT *	FROM wp_posts WHERE	post_date >= " . $hoy." AND post_status in('pending')";
 
 $jugador_n = $wpdb->get_results($query_jugador);
 $encargado_cancha_n = $wpdb->get_results($query_encargado_cancha);
@@ -93,18 +93,19 @@ switch ($user->roles[0]) {
 
 	case 'encargado_cancha':
 		for ($j = 0; $j < count($encargado_cancha_n); $j++) {
-			if ((isset(json_decode($encargado_cancha_n[$j]->post_content)->post_date)) && (new DateTime(json_decode($encargado_cancha_n[$j]->post_content)->post_date) >= new DateTime($hoy))) {
+			/* if ((isset(json_decode($encargado_cancha_n[$j]->post_content)->post_date)) && (new DateTime(json_decode($encargado_cancha_n[$j]->post_content)->post_date) >= new DateTime($hoy))) {
 				if (json_decode(stripslashes(json_decode($encargado_cancha_n[$j]->post_content)->post_content))->tipo_publicacion == "equipo") {
 					$noticias[$j] = $encargado_cancha_n[$j];
 				}
-			}
+			} */
+			var_dump(json_decode(stripslashes($encargado_cancha_n[$j]->post_content)));
+
+			//$noticias[$j] = $encargado_cancha_n[$j];
 		}
+
 		break;
 
 	case 'administrator':
-		//Consulta para saber si el usuario hace parte de un equipo
-		$estar_en_equipo = count($wpdb->get_row("SELECT * FROM wp_team_players WHERE id_player=" . $user->ID));
-
 		for ($i = 0; $i < count($jugador_n); $i++) {
 			if (json_decode(stripslashes($jugador_n[$i]->json_data))->tipo_publicacion == 'equipo' || json_decode(stripslashes($jugador_n[$i]->json_data))->tipo_publicacion == 'partido') {
 				$datos_cancha = $wpdb->get_row("SELECT * FROM wp_courts WHERE id = " . json_decode(stripslashes($jugador_n[$i]->json_data))->cancha);
@@ -238,13 +239,12 @@ switch ($user->roles[0]) {
 				<?php foreach ($noticias as $a_nec) : ?>
 					<div clas="noticia_encargado_cancha">
 						<?php
-						$b_nec = json_decode($a_nec->post_content);
-						$c_nec = json_decode(stripslashes($b_nec->post_content));
+						/* $b_nec = json_decode($a_nec->post_content);
+						$c_nec = json_decode(stripslashes($b_nec->post_content)); */
 						/* $cap_visitante = $nec->post_author;
 						$cap_local = $d_nec->post_author; */
 						/* var_dump($a_nec);
-						var_dump($b_nec);
-						var_dump($c_nec); */
+						var_dump($b_nec);*/
 						?>
 
 					</div>
@@ -437,7 +437,7 @@ switch ($user->roles[0]) {
 	}
 
 	.mainModal {
-		position: fixed;
+		position: absolute;
 		width: 100%;
 		height: 100vh;
 		background: rgb(0, 0, 0, 0.81);
@@ -555,42 +555,6 @@ switch ($user->roles[0]) {
 						}, "json")
 				}
 			});
-			/* 
-						$('.aceptar_reto').on('click', function(e) {
-							e.preventDefault();
-							var post = $(this).data('post')
-							var anuncio = $(this).data('anuncio')
-
-							if (confirm("¿Está seguro que quiere aceptar el reto de " + anuncio.nombre + " para jugar el " + anuncio.fecha + "?")) {
-								$('.mainModal').fadeIn(); //Abre ventana modal
-
-								$('.formModal').submit(function(e) {
-									e.preventDefault();
-									var data = $(this).serializeArray();
-
-									$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=aceptar_reto_equipo', {
-											"user_id": <?= $user->ID ?>,
-											"post_id": anuncio.id,
-											"rival": data[0].value,
-											"datos_otra_cancha": data[1].value
-										},
-										function(r) {
-											alert(r.message);
-
-											if (r.success) {
-												$('.mainModal').fadeOut(); //Cierra ventana modal	
-												window.location.reload(); //Reinicia los valores del formulario en la ventana modal
-
-
-												//window.location.href = "/notifications";
-											}
-										},
-										"json"
-									);
-								});
-							}
-						}); */
-
 
 			$('.aceptar_reto').on('click', function(e) {
 				e.preventDefault();
@@ -598,20 +562,50 @@ switch ($user->roles[0]) {
 				var anuncio = $(this).data('anuncio')
 
 				if (confirm("¿Está seguro que quiere aceptar el reto de " + anuncio.nombre + " para jugar el " + anuncio.fecha + "?")) {
+					$('.mainModal').fadeIn(); //Abre ventana modal
 
-					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=aceptar_reto_equipo', {
-							"user_id": <?= $user->ID ?>,
-							"post_id": anuncio.id
-						},
-						function(r) {
-							alert(r.message);
+					$('.formModal').submit(function(e) {
+						e.preventDefault();
+						var data = $(this).serializeArray();
 
-							if (r.success) {
-								window.location.href = "/notifications";
+						var tipo_futbol_anuncio = post.equipo.tipo, //tipo de futbol del equipo del anuncio
+							tipo_futbol_mi_equipo = null;
+
+						//Saca el tipo de futbol de mi equipo seleccionado
+						let tipo_futbol = <?= json_encode($wpdb->get_results("SELECT * FROM wp_teams WHERE creado_por = " . $user->ID)) ?>;
+						tipo_futbol.forEach(e => {
+							if (e.id == $('#equipo_s').val()) {
+								tipo_futbol_mi_equipo = e.tipo;
 							}
-						},
-						"json"
-					);
+						});
+
+						//Se realiza validación si el tipo de futbol de del equipo seleccionado en la ventana modal es el mismo en el anuncio
+						if (tipo_futbol_anuncio != tipo_futbol_mi_equipo) {
+							//Muestra el mensaje por un tiempo determinado definido en "setTimeout"
+							$("#aux_tipo_futbol").html("<div id='estilo_aux_tipo_futbol'>El equipo seleccionado juega un tipo diferente de futbol al de el anuncio</div>");
+
+							setTimeout(() => {
+								$("#aux_tipo_futbol").html(null);
+							}, 5000);
+						} else {
+							$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=aceptar_reto_equipo', {
+									"user_id": <?= $user->ID ?>,
+									"post_id": anuncio.id,
+									"rival": data[0].value,
+									"datos_otra_cancha": data[1].value
+								},
+								function(r) {
+									alert(r.message);
+
+									if (r.success) {
+										$('.mainModal').fadeOut(); //Cierra ventana modal	
+										window.location.href = "/notifications";
+									}
+								},
+								"json"
+							);
+						}
+					});
 				}
 			});
 
@@ -620,22 +614,6 @@ switch ($user->roles[0]) {
 
 				$('.mainModal').fadeOut();
 			})
-
-
-			let tipo_futbol = <?= json_encode($wpdb->get_results("SELECT * FROM wp_teams WHERE creado_por = " . $user->ID)) ?>;
-
-			//Muestra que tipo de futbol juega el equipo seleccionado en la venta modal
-			$("#equipo_s").change(function() {
-				if ($('#equipo_s').val() == '') {
-					$("#aux_tipo_futbol").html(null);
-				} else {
-					tipo_futbol.forEach(e => {
-						if (e.id == $('#equipo_s').val()) {
-							$("#aux_tipo_futbol").html("<div id='estilo_aux_tipo_futbol'>El equipo seleccionado juega futbol " + e.tipo + "</div>");
-						}
-					});
-				}
-			});
 
 			//Acción que se realiza cuando el encargado de cancha agenda un partido
 

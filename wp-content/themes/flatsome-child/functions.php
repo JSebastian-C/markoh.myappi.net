@@ -146,21 +146,22 @@ function custom_ajax()
 								user_id = {$_REQUEST['user_id']} and 
 								meta_key = 'telefono'
 						) telefono
-						FROM ";
+						";
 
 				// usuario que aceptó la publicacion
-				//$datos_resp = ["equipo_rival" => $_REQUEST['rival'], "datos_otra_cancha" => $_REQUEST['datos_otra_cancha']]);
+				$datos_resp = ["equipo_rival" => $_REQUEST['rival'], "datos_otra_cancha" => $_REQUEST['datos_otra_cancha']];
 				$usuario = $wpdb->get_row($sql);
 
 				// publicacion
 				$post = $wpdb->get_row("select * from wp_posts where id = {$_REQUEST['post_id']}");
 
 				// datos json de la publicacion
-				//$json = json_decode(stripslashes($post->post_content));
-				$json = json_decode($post->post_content);
+				$json = json_decode(stripslashes($post->post_content));
+				//$json = json_decode($post->post_content);
 
 				// guardamos el usuario que está aceptando la publicacion, dentro de la publicacion
-				$json->respuesta = $usuario;
+				$json->respuesta[0] = $usuario;
+				$json->respuesta[1] = $datos_resp;
 
 				$update = [
 					'post_status'   => 'pending',
@@ -197,6 +198,7 @@ function custom_ajax()
 					'post_content'   => json_encode($post),
 					'post_type'   => "markoh_notification",
 				];
+
 				$wpdb->insert("wp_posts", $insert);
 
 				$response = ['success' => true, 'message' => "EXITO:\nSe le ha enviado una notificacion a ambas partes para que finalicen los detalles del encuentro"];
@@ -773,10 +775,14 @@ function custom_ajax()
 						break;
 
 					default:
-						$response = ['success' => false, "message" => 'No hay un case que coincida en filter_search'];
+						$response = ['success' => false, "message" => 'No hay un case que coincida en Functions.php/filter_search'];
 						break;
 				}
 				break;
+
+				case 'agendar_partido':
+					$response = ['success'=>true, 'message'=> 'Hola agendar_partido'];
+					break;
 
 			default:
 				$response["message"] = "Error de Programación: Acción AJAX Incorrecta";
