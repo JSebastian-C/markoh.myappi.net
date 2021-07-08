@@ -2,6 +2,7 @@
 global $wpdb;
 global $user;
 $hoy = date('Y-m-d');
+$img_court = dirname(__DIR__, 4) . "/wp-content/uploads/2021/05/cancha.png";
 //$hoy = date("y") . "-" . date("m") . "-" . strval(intval(date("d")) - 1);
 $wpdb->get_results("SET lc_time_names = 'es_ES'");
 $query_jugador = "
@@ -59,11 +60,11 @@ $query_jugador = "
 			  WHERE
 			  	p.post_date >= '$hoy' AND 
 			 	p.post_type = 'markoh_invitacion' AND
-				p.post_status not in('pending','accepted')
+				p.post_status not in('pending','accepted','scheduled')
 			  ORDER BY	
 				p.post_date asc";
 
-$query_encargado_cancha = "SELECT *	FROM wp_posts WHERE	post_date >= " . $hoy." AND post_status in('pending')";
+$query_encargado_cancha = "SELECT *	FROM wp_posts WHERE post_status IN('pending') AND post_date >= " . $hoy . " AND post_type = 'markoh_invitacion' ORDER BY ID DESC";
 
 $jugador_n = $wpdb->get_results($query_jugador);
 $encargado_cancha_n = $wpdb->get_results($query_encargado_cancha);
@@ -93,16 +94,17 @@ switch ($user->roles[0]) {
 
 	case 'encargado_cancha':
 		for ($j = 0; $j < count($encargado_cancha_n); $j++) {
-			/* if ((isset(json_decode($encargado_cancha_n[$j]->post_content)->post_date)) && (new DateTime(json_decode($encargado_cancha_n[$j]->post_content)->post_date) >= new DateTime($hoy))) {
-				if (json_decode(stripslashes(json_decode($encargado_cancha_n[$j]->post_content)->post_content))->tipo_publicacion == "equipo") {
-					$noticias[$j] = $encargado_cancha_n[$j];
-				}
-			} */
-			var_dump(json_decode(stripslashes($encargado_cancha_n[$j]->post_content)));
-
-			//$noticias[$j] = $encargado_cancha_n[$j];
+			//Verifica si la columna "post_content" existe o no.
+			//Si es un duelo por equipos
+			//Y también si es un array, esto quiere decir que tiene varios datos conjuntos de datos
+			if (
+				isset($encargado_cancha_n[$j]->post_content) &&
+				json_decode($encargado_cancha_n[$j]->post_content)->tipo_publicacion == "equipo"  &&
+				gettype(json_decode($encargado_cancha_n[$j]->post_content)->respuesta) == "array"
+			) {
+				$noticias[$j] = $encargado_cancha_n[$j];
+			}
 		}
-
 		break;
 
 	case 'administrator':
@@ -155,7 +157,7 @@ switch ($user->roles[0]) {
 						<div id="aux_tipo_futbol"></div>
 					</div>
 
-					<textarea id="textAreaModal" name="datos_otra_cancha" maxlength='200' placeholder="Aquí puedes agregar los datos de una cancha diferente en la que quieras jugar (OPCIONAL)"></textarea>
+					<textarea id="textAreaModal" name="datos_otra_cancha" maxlength='200' placeholder="Aquí puedes agregar solamente datos de una cancha diferente en la que quieras jugar (OPCIONAL)"></textarea>
 					<a><button id="buttonSaveInfo" type="submit">Proceder</button></a>
 				</form>
 			</div>
@@ -236,19 +238,80 @@ switch ($user->roles[0]) {
 
 			<?php
 			case 'encargado_cancha': ?>
-				<?php foreach ($noticias as $a_nec) : ?>
-					<div clas="noticia_encargado_cancha">
-						<?php
-						/* $b_nec = json_decode($a_nec->post_content);
-						$c_nec = json_decode(stripslashes($b_nec->post_content)); */
-						/* $cap_visitante = $nec->post_author;
-						$cap_local = $d_nec->post_author; */
-						/* var_dump($a_nec);
-						var_dump($b_nec);*/
-						?>
+				<?php for ($i = 0; $i < count($noticias); $i++) : ?>
+					<?php
+					$d_nec = json_decode($noticias[$i]->post_content);
+					//Datos de los equipos que se van a enfrentar
+					$equipo1 = $d_nec->equipo;
+					$equipo2 = $wpdb->get_row("SELECT * FROM wp_teams WHERE id = " . $d_nec->respuesta[1]->equipo_rival);
+					//Persona que creó el equipo
+					$lider1 = get_user_meta($equipo1->creado_por);
+					$lider2 = get_user_meta($equipo2->creado_por);
+					//cancha donse se va a jugar
+					$cancha = $wpdb->get_row("SELECT * FROM wp_courts WHERE id = " . json_decode($noticias[$i]->post_content)->cancha);
+					//Se traen las canchas que el usuario creó
+					$mis_canchas = $wpdb->get_results("SELECT * FROM wp_courts WHERE creado_por = " . $user->ID);
 
-					</div>
-				<?php endforeach; ?>
+					$es_mi_cancha = null;
+					foreach ($mis_canchas as $k) {
+						if ($k->id == json_decode($noticias[$i]->post_content)->cancha) {
+							$es_mi_cancha = true;
+						} else {
+							$es_mi_cancha = false;
+						}
+					}
+					?>
+
+					<!-- Validación para filtrar los post donde la cancha donde van a jugar sea del usuario en sesión -->
+					<?php if ($es_mi_cancha) : ?>
+						<div class="noticia_encargado_cancha">
+							<i></i>
+
+							<div class="headerVS">
+								<div>
+									<h5><?= strtoupper($equipo1->nombre) ?></h5>
+									<?php if (isset($lider1["telefono"][0])) : ?>
+										<a target="blank" href="whatsapp://send?phone=57<?= $lider1["telefono"][0] ?>" class="whatsapp">
+											<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
+											<span><?= $lider1["telefono"][0] ?></span>
+										</a>
+									<?php else : ?>
+										<em>Sin número</em>
+									<?php endif; ?>
+								</div>
+								<em>vs</em>
+								<div>
+									<h5><?= strtoupper($equipo2->nombre) ?></h5>
+									<?php if (isset($lider2["telefono"][0])) : ?>
+										<a target="blank" href="whatsapp://send?phone=57<?= $lider2["telefono"][0] ?>" class="whatsapp">
+											<img src="https://markoh.myappi.net/wp-content/uploads/2021/05/whatsapp_icon.png">
+											<span><?= $lider2["telefono"][0] ?></span>
+										</a>
+									<?php else : ?>
+										<em>Sin número</em>
+									<?php endif; ?>
+								</div>
+							</div>
+
+							<div class="info_partido">
+								<p>
+									Día del partido: <?= json_decode($noticias[$i]->post_content)->vence ?> a las <?= json_decode($noticias[$i]->post_content)->hora ?><br>
+									Cancha: <?= $cancha->nombre ?><br>
+									<?= $d_nec->respuesta[1]->datos_otra_cancha == "" ? null : "<b>Nota: </b>El equipo <b>" . $equipo2->nombre . "</b> quiere jugar en " . $d_nec->respuesta[1]->datos_otra_cancha . "<br>" ?>
+									Tipo de futbol: <?= (isset(json_decode($noticias[$i]->post_content)->equipo->tipo) ? json_decode($noticias[$i]->post_content)->equipo->tipo : "Sin tipo") ?>
+								</p>
+							</div>
+
+							<a class="button primary is-xsmall agendar_partido" data-post='<?= json_encode($noticias[$i]) ?>'><span>Agendar partido</span></a>
+						</div>
+
+					<?php else : ?>
+						<h1>Aún no hay noticias registradas</h1>
+					<?php endif;
+					break;
+					?>
+				<?php endfor; ?>
+
 				<?php break; ?>
 
 
@@ -309,7 +372,7 @@ switch ($user->roles[0]) {
 
 			<?php
 			default: ?>
-				<em>Error en el switch al mostrar datos con el case de administrador</em>
+				<em>Rol desconocido</em>
 				<?php break; ?>
 		<?php endswitch; ?>
 
@@ -401,7 +464,8 @@ switch ($user->roles[0]) {
 	}
 
 	.noticia_jugador>i,
-	.noticia_administrador>i {
+	.noticia_administrador>i,
+	.noticia_encargado_cancha>i {
 		position: absolute;
 		width: 10px;
 		height: 10px;
@@ -425,7 +489,8 @@ switch ($user->roles[0]) {
 	}
 
 	.noticia_jugador,
-	.noticia_administrador {
+	.noticia_administrador,
+	.noticia_encargado_cancha {
 		position: relative;
 		margin: 5px;
 		padding: 10px 20px 10px 40px;
@@ -436,15 +501,43 @@ switch ($user->roles[0]) {
 		box-shadow: 2px 2px 10px -1px rgb(0 0 0 / 10%);
 	}
 
+	@media screen and (min-width: 445px) {
+		.headerVS {
+			display: flex;
+		}
+	}
+
+	@media screen and (max-width: 445px) {
+		.headerVS {
+			display: relative;
+		}
+	}
+
+	.noticia_encargado_cancha div em {
+		margin: 20px;
+	}
+
+	.noticia_encargado_cancha div div a {
+		margin-top: 0px;
+	}
+
+	.info_partido {
+		font-size: 13px;
+		margin: 10px 0px;
+		background: #eee;
+		padding-left: 5px;
+		border-radius: 3px;
+	}
+
 	.mainModal {
 		position: absolute;
 		width: 100%;
 		height: 100vh;
 		background: rgb(0, 0, 0, 0.81);
 		display: none;
-		z-index: 999;
+		margin-top: -10px;
 		margin-left: -10px;
-		margin-top: -80px;
+		z-index: 999;
 		padding: 15%;
 		padding-left: 20%;
 		padding-right: 20%;
@@ -616,7 +709,32 @@ switch ($user->roles[0]) {
 			})
 
 			//Acción que se realiza cuando el encargado de cancha agenda un partido
+			$('.agendar_partido').on('click', function(e) {
+				e.preventDefault();
+				var data1 = $(this).data('post'),
+					data2 = JSON.parse(data1.post_content),
+					equipo1 = data2.equipo,
+					equipo2 = data2.respuesta[1].equipo_rival
 
+				if (confirm("¿Está seguro que quiere agendar este partido?")) {
+					$.post('/wp-admin/admin-ajax.php?action=custom_ajax&caction=agendar_partido', {
+							"data1": data1,
+							"data2": data2,
+							"user_id": <?= $user->ID ?>,
+							"equipo1": equipo1,
+							"equipo2": equipo2
+						},
+						function(r) {
+							alert(r.message);
+							if (r.success) {
+								window.location.reload();
+								window.location.href = "/notifications";
+							}
+						},
+						"json"
+					)
+				}
+			})
 		})
 	</script>
 <?php }); ?>

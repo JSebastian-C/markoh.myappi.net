@@ -2,13 +2,7 @@
 global $user;
 global $wpdb;
 $es_capitan = $wpdb->get_var("select if(count(1)>0,1,0) from wp_teams where creado_por = {$user->ID}");
-$query = "
-			SELECT 
-				t.* 
-			  FROM 
-				wp_teams t
-			  WHERE
-				t.creado_por = {$user->ID}";
+$query = "SELECT t.* FROM wp_teams t WHERE t.creado_por = {$user->ID}";
 
 $equipos = $wpdb->get_results($query);
 $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
@@ -50,15 +44,6 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 				<!-- En la etiqueta <p> se muestra el tipo de futbol que juega el equipo seleccionado -->
 				<div id="aux_tipo_futbol"></div>
 			</div>
-			<div class="s_cancha" style="display: none;">
-				<b>Selecciona la cancha donde quieres jugar</b>
-				<select name="cancha" required>
-					<option value=" ">Seleccionar</option>
-					<?php foreach ($canchas as $c) : ?>
-						<option value="<?= $c->id ?>"> <?= $c->nombre ?> </option>
-					<?php endforeach; ?>
-				</select>
-			</div>
 			<b>Ciudad</b>
 			<input type="text" name="ciudad" required>
 			<br>
@@ -71,8 +56,17 @@ $canchas = $wpdb->get_results("SELECT * FROM wp_courts");
 			<input type="time" name="hora" required style="width:100%;">
 			<br>
 			<br>
-			<b>Lugar</b>
-			<input type="text" name="lugar" required>
+			<div class="s_cancha" style="display: none;">
+				<b>Selecciona la cancha donde quieres jugar</b>
+				<select name="cancha" required>
+					<option value=" ">Seleccionar</option>
+					<?php foreach ($canchas as $c) : ?>
+						<option value="<?= $c->id ?>"><?= $c->nombre ?> ubicada en <?= $c->ciudad ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+		<!-- 	<b>Lugar</b>
+			<input type="text" name="lugar" required> -->
 			<br>
 			<br>
 			<b>Escribe tus comentarios </b>

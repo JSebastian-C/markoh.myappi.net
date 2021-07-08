@@ -50,7 +50,6 @@ $equipos = $wpdb->get_results($query);
 						$nombre = get_user_meta($j->id_player, 'nombre')[0];
 						$apellido = get_user_meta($j->id_player, 'apellido')[0];
 						$posicion = get_user_meta($j->id_player, 'posicion')[0];
-
 						?>
 						<div class="jugador" style="position:relative;margin-top:10px;padding-left:40px;">
 							<div class="image_container" style="background-image:url(<?= $imagen ?>);top:0;left:0px;height:30px;width:30px;"></div>

@@ -36,19 +36,19 @@ $usuarios = $wpdb->get_results($query);
 				<input type="file" accept=".jpg, .jpeg, .png, .gif" />
 			</div>
 			<br>
-			<input type="text" name="nombre" required placeholder="Nombre">
+			<input type="text" name="nombre" maxlength="100" required placeholder="Nombre">
 			<br>
 			<br>
-			<input type="text" name="direccion" required placeholder="Dirección">
+			<input type="text" name="direccion" maxlength="200" required placeholder="Dirección">
 			<br>
 			<br>
-			<input type="text" name="ciudad" required placeholder="Ciudad">
+			<input type="text" name="ciudad" maxlength="50" required placeholder="Ciudad">
 			<br>
 			<br>
-			<input type="text" name="horario" required placeholder="Horario. Ejem: 8:00 pm - 9:00 pm">
+			<input type="text" name="horario" maxlength="20" required placeholder="Horario. Ejem: 8:00 pm - 9:00 pm">
 			<br>
 			<br>
-			<input type="number" name="telefono" required placeholder="Teléfono. Ejem: 3001234567">
+			<input type="number" name="telefono" maxlength="10" required placeholder="Teléfono. Ejem: 3001234567">
 			<br>
 			<br>
 

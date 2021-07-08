@@ -20,7 +20,7 @@
 			
 			
 			<div class="noticia">
-				<div class="image_container" style="background-image:url(<?=!empty($v->logo_url) ? $v->logo_url : "https://markoh.myappi.net/wp-content/uploads/2021/05/markoh-image-banner-1.png" ?>);"></div>
+				<div class="image_container" style="background-image:url(<?= !empty($v->logo_url) ? $v->logo_url : "https://markoh.myappi.net/wp-content/uploads/2021/05/markoh-image-banner-1.png" ?>);"></div>
 				
 					<a href="#" class="opciones"><i class="fa fa-ellipsis-v"></i></a>
 					<div class="opciones_links">

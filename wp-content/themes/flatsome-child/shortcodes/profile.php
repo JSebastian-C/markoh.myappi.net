@@ -58,7 +58,7 @@ $profile_picture = (isset($meta->profile_picture[0])) ? $meta->profile_picture[0
 			</tr>
 		</table>
 	</div>
-	<?php ?>
+	<?php  ?>
 	<h2 class="text-center">Editar Perfil</h2>
 	<div class="login_form register">
 		<form id="form_register">

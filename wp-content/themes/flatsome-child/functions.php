@@ -4,7 +4,6 @@ static $navigation = array();
 function custom_ajax()
 {
 	global $wpdb;
-	global $navigation;
 	$response = ["success" => false];
 
 	if (isset($_REQUEST["caction"])) {
@@ -334,8 +333,6 @@ function custom_ajax()
 
 				$wpdb->update('wp_teams', $data, ['id' => $id_team]);
 
-
-
 				$wpdb->delete('wp_team_players', ['id_team' => $id_team]);
 
 				$usuarios = explode(',', $_REQUEST['usuarios']);
@@ -466,18 +463,23 @@ function custom_ajax()
 					"direccion" => $_REQUEST['direccion'],
 					"ciudad" => $_REQUEST['ciudad'],
 					"telefono" => $_REQUEST['telefono'],
-					"horario" => $_REQUEST['horario'],
-					"creado_por" => $user->ID
+					"horario" => $_REQUEST['horario']/* ,
+					"creado_por" => $user->ID */
 				];
+
 				if (count($_FILES) > 0) {
-					$data["logo_url"] = $image_url;
-					$data["logo_path"] = $image_path;
+					$data = array_merge($data, ["logo_url" => $image_url], ["logo_path" => $image_path]);
+					/* $data["logo_url"] = $image_url;
+					$data["logo_path"] = $image_path; */
 				}
 
-				$wpdb->update('wp_courts', $data, ['id' => $_GET['id']]);
+				$r = $wpdb->update('wp_courts',	$data, array('id' => $_GET['id']));
 
-
-				$response = ['success' => true, 'message' => 'Datos de Cancha modificados exitosamente'];
+				if ($r) {
+					$response = ['success' => true, 'message' => 'Datos de Cancha modificados exitosamente'];
+				} else {
+					$response = ['success' => false, 'message' => 'No se actualizó nada'];
+				}
 				break;
 
 			case "new_team":
@@ -700,12 +702,6 @@ function custom_ajax()
 				$response = ['success' => true, 'url' => $url, 'message' => 'Registro exitoso'];
 				break;
 
-			case "type_of_soccer":
-				$r = $wpdb->get_row("SELECT id, tipo, nombre FROM wp_teams WHERE creado_por = " . $_REQUEST['id']);
-				$r ? $response = ['success' => true, 'data' => $r] : $response = ['success' => false, 'data' => 'null'];
-
-				break;
-
 			case "filter_search":
 				switch ($_REQUEST['screen']) {
 					case 'jugadores':
@@ -780,9 +776,29 @@ function custom_ajax()
 				}
 				break;
 
-				case 'agendar_partido':
-					$response = ['success'=>true, 'message'=> 'Hola agendar_partido'];
-					break;
+			case 'agendar_partido':
+				$data1 = json_encode($_REQUEST["data1"]);
+				$data2 = json_encode($_REQUEST["data2"]);
+				$equipo1 = $_REQUEST["equipo1"];
+				$equipo2 = $wpdb->get_row("SELECT * FROM wp_teams WHERE id = " . $_REQUEST["equipo2"]);
+
+				$post = [
+					"post_author" => $_REQUEST["user_id"],
+					"post_content" => $data1,
+					"post_title" => "Solicitud de match agendada",
+					"post_excerpt" => "¡El partido de <b>" . $equipo1["nombre"] . "</b> vs <b>" . $equipo2->nombre . "</b> fue agendado!",
+					"post_status" => "scheduled",
+					"post_type" => "markoh_notification"
+				];
+
+				//Modifica la columna "post_status" a agendado/scheduled
+				$wpdb->update('wp_posts', ["post_status" => "scheduled"], ['ID' => json_decode($data1)->ID]);
+
+				//Agrega la notificacion 
+				$wpdb->insert("wp_posts", $post);
+
+				$response = ["success" => true, "message" => "El partido ha sido agendado satisfactoriamente"];
+				break;
 
 			default:
 				$response["message"] = "Error de Programación: Acción AJAX Incorrecta";

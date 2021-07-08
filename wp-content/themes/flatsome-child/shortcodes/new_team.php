@@ -4,6 +4,7 @@ global $meta;
 global $wpdb;
 //$url = 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png';
 $url = "/wp-content/uploads/2021/05/cancha.png";
+$img_profile = $_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER["HTTP_HOST"] . '/wp-content/uploads/2021/05/user_avatar.png';
 
 $query =   'select 
 					u.ID id, 
@@ -54,7 +55,7 @@ $usuarios = $wpdb->get_results($query);
 			</div>
 			<table class="table_seleccionados">
 				<tr data-id="<?= $user->ID ?>">
-					<td width="40px"><img src="<?= empty($user->profile_picture) ? 'https://markoh.myappi.net/wp-content/uploads/2021/05/user_avatar.png' : $user->profile_picture ?>" width="40px" /></td>
+					<td width="40px"><img src="<?= empty($user->profile_picture) ? $img_profile : $user->profile_picture ?>" width="40px" /></td>
 					<td width=""><?= $user->nombre . ' ' . $user->apellido ?></td>
 					<td width="30px"><a href="#" class="delete_user" style="color:#cb0505;font-size:25px;"><i class="fa fa-times-circle"></i></a></td>
 				</tr>
