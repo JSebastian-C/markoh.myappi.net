@@ -96,10 +96,10 @@ switch ($user->roles[0]) {
 											<em>Ciudad: <?= $cancha->ciudad ?></em><br>
 											<em>Día: <?= json_decode(stripslashes(json_decode($noticias[$i]->post_content)->post_content))->vence ?>
 												a las <?= json_decode(stripslashes(json_decode($noticias[$i]->post_content)->post_content))->hora ?> </em><br>
-											<?php if (isset($encargado_cancha["telefono"][0])) : ?>
-												<a target="blank" href="whatsapp://send?phone=57<?= $encargado_cancha["telefono"][0] ?>" class="whatsapp">
+											<?php if (isset($cancha->telefono)) : ?>
+												<a target="blank" href="whatsapp://send?phone=57<?= $cancha->telefono ?>" class="whatsapp">
 													<img src="<?php dirname(__DIR__, 4) ?>/wp-content/uploads/2021/05/whatsapp_icon.png" />
-													<span><?= $encargado_cancha["telefono"][0] ?></span>
+													<span><?= $cancha->telefono ?></span>
 												</a>
 											<?php endif; ?>
 											<div class="divider"></div>
@@ -156,8 +156,8 @@ switch ($user->roles[0]) {
 
 						<i></i>
 						<!-- <h3> -->
-							<!-- <?= $noticias[$i]->post_title ?> -->
-					<!-- 	</h3> -->
+						<!-- <?= $noticias[$i]->post_title ?> -->
+						<!-- 	</h3> -->
 						<p><?= $noticias[$i]->post_excerpt ?></p>
 						<?php if (isset($data->telefono)) : ?>
 							<a target="blank" href="whatsapp://send?phone=57<?= $data->telefono ?>" class="whatsapp">

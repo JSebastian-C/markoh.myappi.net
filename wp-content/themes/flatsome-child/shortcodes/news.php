@@ -535,7 +535,7 @@ switch ($user->roles[0]) {
 		height: 100vh;
 		background: rgb(0, 0, 0, 0.81);
 		display: none;
-		margin-top: -10px;
+		margin-top: -80px;
 		margin-left: -10px;
 		z-index: 999;
 		padding: 15%;
