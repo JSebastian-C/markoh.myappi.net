@@ -1,5 +1,4 @@
 <?php
-static $navigation = array();
 
 function custom_ajax()
 {
